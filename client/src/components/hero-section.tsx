@@ -43,19 +43,19 @@ export default function HeroSection() {
               <br />
               I'm <span className="text-primary">Satya Ravi</span>
             </h1>
-            <h2 className="font-space text-2xl lg:text-3xl xl:text-4xl font-light text-gray-300">
-              I'm not <span className="relative italic">
-                just a Developer.
+            <h2 className="font-space text-2xl lg:text-3xl xl:text-4xl font-light text-gray-300 relative">
+              <span className="relative italic">
+                I'm not just a Developer.
                 <svg
                   className="absolute inset-0 w-full h-full pointer-events-none scribble-animation"
                   xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 200 40"
+                  viewBox="0 0 400 40"
                   preserveAspectRatio="none"
                 >
                   <path
-                    d="M5,20 Q30,10 60,22 T100,18 T140,23 T180,17 T195,20 M10,18 Q35,25 70,15 T110,24 T150,16 T190,22 M8,22 Q40,15 75,25 T120,20 T160,25 T195,18"
+                    d="M5,20 Q50,10 100,22 T200,18 T280,23 T360,17 T395,20 M10,18 Q60,25 120,15 T220,24 T300,16 T390,22 M8,22 Q70,15 140,25 T240,20 T320,25 T395,18"
                     stroke="rgb(239 68 68)"
-                    strokeWidth="3"
+                    strokeWidth="4"
                     fill="none"
                     strokeLinecap="round"
                     opacity="0.9"
