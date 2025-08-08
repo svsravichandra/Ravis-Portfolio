@@ -4,14 +4,15 @@ import portraitImage from "@assets/ChatGPT Image Aug 8, 2025, 04_52_14 AM_175466
 
 export default function HeroSection() {
   return (
-    <section id="hero" className="min-h-screen flex items-center justify-center px-6 lg:px-12">
+    <section id="hero" className="min-h-screen flex items-center justify-center px-6 lg:px-12 section-snap">
       <div className="max-w-7xl mx-auto w-full">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <motion.div 
             className="space-y-8"
             initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
             <h1 className="font-space text-4xl lg:text-6xl xl:text-7xl font-bold leading-tight">
@@ -48,12 +49,13 @@ export default function HeroSection() {
           <motion.div 
             className="portrait-container flex justify-center lg:justify-end" 
             id="portrait-hero"
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, x: 50, scale: 0.9 }}
+            whileInView={{ opacity: 1, x: 0, scale: 1 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             <div className="relative">
-              <div className="w-80 h-80 lg:w-96 lg:h-96 rounded-full overflow-hidden glass animate-float">
+              <div className="w-80 h-80 lg:w-96 lg:h-96 rounded-full overflow-hidden glass animate-float portrait-glow">
                 <img 
                   src={portraitImage} 
                   alt="Satya Ravi - Professional Portrait" 

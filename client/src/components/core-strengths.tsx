@@ -25,7 +25,7 @@ const strengthTiles = [
 
 export default function CoreStrengths() {
   return (
-    <section id="strengths" className="min-h-screen flex items-center justify-center px-6 lg:px-12">
+    <section id="strengths" className="min-h-screen flex items-center justify-center px-6 lg:px-12 section-snap">
       <div className="max-w-7xl mx-auto w-full text-center">
         <motion.div 
           className="mb-16"

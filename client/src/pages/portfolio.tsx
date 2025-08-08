@@ -5,6 +5,8 @@ import CoreStrengths from "@/components/core-strengths";
 import SkillSection from "@/components/skill-section";
 import ChatbotSection from "@/components/chatbot-section";
 import Footer from "@/components/footer";
+import ParticleBackground from "@/components/particle-background";
+import FloatingChatbot from "@/components/floating-chatbot";
 
 const sectionIds = ['hero', 'strengths', 'frontend', 'ai', 'innovation', 'architecture', 'chatbot'];
 
@@ -86,6 +88,8 @@ export default function Portfolio() {
 
   return (
     <div className="relative">
+      <ParticleBackground />
+      <FloatingChatbot />
       <NavigationDots 
         activeSection={activeSection}
         totalSections={sectionIds.length}

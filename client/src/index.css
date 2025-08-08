@@ -73,11 +73,16 @@
 
   html {
     scroll-behavior: smooth;
-    scroll-snap-type: y mandatory;
   }
 
   body {
     @apply font-sans antialiased bg-gradient-to-br from-dark via-darker to-dark text-foreground overflow-x-hidden;
+  }
+
+  #root {
+    scroll-snap-type: y mandatory;
+    height: 100vh;
+    overflow-y: auto;
   }
 
   /* Particle background container */

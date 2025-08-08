@@ -69,7 +69,7 @@ export default function ChatbotSection() {
   ];
 
   return (
-    <section id="chatbot" className="min-h-screen flex items-center justify-center px-6 lg:px-12">
+    <section id="chatbot" className="min-h-screen flex items-center justify-center px-6 lg:px-12 section-snap">
       <div className="max-w-7xl mx-auto w-full">
         <motion.div 
           className="text-center mb-12"

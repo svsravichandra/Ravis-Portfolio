@@ -31,7 +31,7 @@ export default function SkillSection({
   const visualOrder = reverse ? "order-2 lg:order-1" : "";
 
   return (
-    <section id={id} className="min-h-screen flex items-center justify-center px-6 lg:px-12">
+    <section id={id} className="min-h-screen flex items-center justify-center px-6 lg:px-12 section-snap">
       <div className="max-w-7xl mx-auto w-full">
         <div className="grid lg:grid-cols-3 gap-12 items-center">
           <motion.div 
