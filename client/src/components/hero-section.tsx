@@ -62,7 +62,6 @@ export default function HeroSection() {
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="absolute inset-0 rounded-full animate-glow"></div>
             </div>
           </motion.div>
         </div>
