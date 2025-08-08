@@ -43,27 +43,32 @@ export default function HeroSection() {
               <br />
               I'm <span className="text-primary">Satya Ravi</span>
             </h1>
-            <h2 className="font-space text-2xl lg:text-3xl xl:text-4xl font-light text-gray-300 relative">
-              <span className="relative italic">
-                I'm not just a Developer.
-                <svg
-                  className="absolute inset-0 w-full h-full pointer-events-none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 400 40"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M5,20 Q80,15 160,22 T320,18 T395,20 M8,18 Q100,24 200,17 T390,22"
-                    stroke="rgb(239 68 68)"
-                    strokeWidth="5"
-                    fill="none"
-                    strokeLinecap="round"
-                    opacity="0.85"
-                    className="scribble-path"
-                  />
-                </svg>
-              </span>
-            </h2>
+            <div className="space-y-2">
+              <h2 className="font-space text-2xl lg:text-3xl xl:text-4xl font-light text-gray-300 relative">
+                <span className="relative italic">
+                  I'm not just a Developer.
+                  <svg
+                    className="absolute inset-0 w-full h-full pointer-events-none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 400 40"
+                    preserveAspectRatio="none"
+                  >
+                    <path
+                      d="M5,20 Q80,15 160,22 T320,18 T395,20 M8,18 Q100,24 200,17 T390,22"
+                      stroke="rgb(239 68 68)"
+                      strokeWidth="5"
+                      fill="none"
+                      strokeLinecap="round"
+                      opacity="0.85"
+                      className="scribble-path"
+                    />
+                  </svg>
+                </span>
+              </h2>
+              <div className="handwritten-text text-2xl lg:text-3xl xl:text-4xl" style={{ color: 'rgb(239 68 68)' }}>
+                I Craft Innovations
+              </div>
+            </div>
             <p className="text-xl lg:text-2xl text-gray-400 leading-relaxed max-w-2xl">
               I build intelligent applications with{" "}
               <span className="text-primary font-semibold">scale</span>,
