@@ -43,8 +43,11 @@ export default function HeroSection() {
               <br />
               I'm <span className="text-primary">Satya Ravi</span>
             </h1>
-            <h2 className="font-space text-2xl lg:text-3xl xl:text-4xl font-light text-gray-300">
-              I'm not just a <span className="text-secondary">Developer.</span>
+            <h2 className="font-space text-2xl lg:text-3xl xl:text-4xl font-light text-gray-300 relative inline-block">
+              <span className="relative">
+                I'm not just a <span className="text-secondary">Developer.</span>
+                <span className="strikethrough-marker"></span>
+              </span>
             </h2>
             <p className="text-xl lg:text-2xl text-gray-400 leading-relaxed max-w-2xl">
               I build intelligent applications with{" "}
