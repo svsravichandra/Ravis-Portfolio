@@ -19,16 +19,34 @@ export function useScrollObserver(sectionIds: string[]) {
         
         if (entry.isIntersecting) {
           setVisibleSections(prev => new Set(Array.from(prev).concat(sectionIndex)));
+        } else {
+          setVisibleSections(prev => {
+            const newSet = new Set(Array.from(prev));
+            newSet.delete(sectionIndex);
+            return newSet;
+          });
+        }
+      });
+
+      // Find the section that's closest to the center of the viewport
+      const viewportCenter = window.innerHeight / 2;
+      let closestSection = 0;
+      let closestDistance = Infinity;
+
+      sections.forEach((section, index) => {
+        if (section) {
+          const rect = section.getBoundingClientRect();
+          const sectionCenter = rect.top + rect.height / 2;
+          const distance = Math.abs(sectionCenter - viewportCenter);
           
-          // Update active section based on viewport center
-          const rect = entry.target.getBoundingClientRect();
-          const isInCenter = rect.top < window.innerHeight / 2 && rect.bottom > window.innerHeight / 2;
-          
-          if (isInCenter) {
-            setActiveSection(sectionIndex);
+          if (distance < closestDistance && rect.bottom > 0 && rect.top < window.innerHeight) {
+            closestDistance = distance;
+            closestSection = index;
           }
         }
       });
+
+      setActiveSection(closestSection);
     }, observerOptions);
 
     sections.forEach(section => {
