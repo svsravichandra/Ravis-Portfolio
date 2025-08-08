@@ -44,7 +44,25 @@ export default function HeroSection() {
               I'm <span className="text-primary">Satya Ravi</span>
             </h1>
             <h2 className="font-space text-2xl lg:text-3xl xl:text-4xl font-light text-gray-300">
-              I'm not <span className="italic line-through decoration-red-500 decoration-2">just a Developer.</span>
+              I'm not <span className="relative italic">
+                just a Developer.
+                <svg
+                  className="absolute inset-0 w-full h-full pointer-events-none scribble-animation"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 200 40"
+                  preserveAspectRatio="none"
+                >
+                  <path
+                    d="M5,20 Q30,10 60,22 T100,18 T140,23 T180,17 T195,20 M10,18 Q35,25 70,15 T110,24 T150,16 T190,22 M8,22 Q40,15 75,25 T120,20 T160,25 T195,18"
+                    stroke="rgb(239 68 68)"
+                    strokeWidth="3"
+                    fill="none"
+                    strokeLinecap="round"
+                    opacity="0.9"
+                    className="scribble-path"
+                  />
+                </svg>
+              </span>
             </h2>
             <p className="text-xl lg:text-2xl text-gray-400 leading-relaxed max-w-2xl">
               I build intelligent applications with{" "}

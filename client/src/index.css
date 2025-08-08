@@ -253,4 +253,49 @@
     transform: translateZ(0);
     will-change: transform;
   }
+
+  /* Scribble animation for strikethrough */
+  .scribble-animation {
+    overflow: visible;
+  }
+
+  .scribble-path {
+    stroke-dasharray: 500;
+    stroke-dashoffset: 500;
+    animation: draw-scribble 0.8s ease-out forwards;
+    animation-delay: 1.5s;
+    filter: drop-shadow(0 0 2px rgba(239, 68, 68, 0.5));
+  }
+
+  @keyframes draw-scribble {
+    0% {
+      stroke-dashoffset: 500;
+      opacity: 0;
+    }
+    20% {
+      opacity: 0.9;
+    }
+    100% {
+      stroke-dashoffset: 0;
+      opacity: 0.9;
+    }
+  }
+
+  /* Add hand-drawn wiggle effect */
+  @keyframes wiggle {
+    0%, 100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    25% {
+      transform: translateY(-1px) rotate(0.5deg);
+    }
+    75% {
+      transform: translateY(1px) rotate(-0.5deg);
+    }
+  }
+
+  .scribble-animation {
+    animation: wiggle 0.1s ease-in-out infinite;
+    animation-delay: 2.3s;
+  }
 }
