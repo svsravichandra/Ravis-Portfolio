@@ -1,0 +1,129 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 6.3%);
+  --foreground: hsl(0, 0%, 91.2%);
+  --card: hsl(0, 0%, 10%);
+  --card-foreground: hsl(0, 0%, 85.1%);
+  --popover: hsl(0, 0%, 6.3%);
+  --popover-foreground: hsl(0, 0%, 91.2%);
+  --primary: hsl(190, 100%, 50%);
+  --primary-foreground: hsl(0, 0%, 6.3%);
+  --secondary: hsl(196, 69%, 37%);
+  --secondary-foreground: hsl(0, 0%, 91.2%);
+  --muted: hsl(0, 0%, 9.4%);
+  --muted-foreground: hsl(0, 0%, 46.3%);
+  --accent: hsl(0, 0%, 14.9%);
+  --accent-foreground: hsl(0, 0%, 91.2%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 91.2%);
+  --border: hsl(0, 0%, 14.9%);
+  --input: hsl(0, 0%, 14.9%);
+  --ring: hsl(190, 100%, 50%);
+  --chart-1: hsl(190, 100%, 50%);
+  --chart-2: hsl(196, 69%, 37%);
+  --chart-3: hsl(42, 92%, 56%);
+  --chart-4: hsl(147, 79%, 42%);
+  --chart-5: hsl(341, 75%, 51%);
+  --sidebar: hsl(0, 0%, 10%);
+  --sidebar-foreground: hsl(0, 0%, 85.1%);
+  --sidebar-primary: hsl(190, 100%, 50%);
+  --sidebar-primary-foreground: hsl(0, 0%, 6.3%);
+  --sidebar-accent: hsl(0, 0%, 14.9%);
+  --sidebar-accent-foreground: hsl(0, 0%, 91.2%);
+  --sidebar-border: hsl(0, 0%, 14.9%);
+  --sidebar-ring: hsl(190, 100%, 50%);
+  --font-sans: 'Inter', sans-serif;
+  --font-space: 'Space Grotesk', sans-serif;
+  --font-mono: Menlo, monospace;
+  --radius: 1.3rem;
+  --dark: hsl(0, 0%, 3.9%);
+  --darker: hsl(0, 0%, 6.3%);
+}
+
+.dark {
+  --background: hsl(0, 0%, 3.9%);
+  --foreground: hsl(0, 0%, 91.2%);
+  --card: hsl(0, 0%, 10%);
+  --card-foreground: hsl(0, 0%, 85.1%);
+  --popover: hsl(0, 0%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 91.2%);
+  --primary: hsl(190, 100%, 50%);
+  --primary-foreground: hsl(0, 0%, 3.9%);
+  --secondary: hsl(196, 69%, 37%);
+  --secondary-foreground: hsl(0, 0%, 91.2%);
+  --muted: hsl(0, 0%, 9.4%);
+  --muted-foreground: hsl(0, 0%, 46.3%);
+  --accent: hsl(0, 0%, 14.9%);
+  --accent-foreground: hsl(0, 0%, 91.2%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 91.2%);
+  --border: hsl(0, 0%, 14.9%);
+  --input: hsl(0, 0%, 14.9%);
+  --ring: hsl(190, 100%, 50%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-gradient-to-br from-dark via-darker to-dark text-foreground overflow-x-hidden;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .nav-dot {
+    transition: all 0.3s ease;
+  }
+
+  .nav-dot.active {
+    background: hsl(190, 100%, 50%);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+  }
+
+  .portrait-container {
+    transition: all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
+
+  .section {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.8s ease-out;
+  }
+
+  .section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .tile-hover:hover {
+    transform: translateY(-5px) rotate(1deg);
+    box-shadow: 0 20px 40px rgba(0, 212, 255, 0.2);
+  }
+
+  .btn-glow:hover {
+    box-shadow: 0 0 25px rgba(0, 212, 255, 0.5);
+    transform: translateY(-2px);
+  }
+
+  .font-space {
+    font-family: var(--font-space);
+  }
+}
