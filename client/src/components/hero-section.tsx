@@ -46,7 +46,7 @@ export default function HeroSection() {
             <div className="space-y-2">
               <h2 className="font-space text-2xl lg:text-3xl xl:text-4xl font-light text-gray-300 relative">
                 <span className="relative italic">
-                  I'm not just a Developer.
+                  I'm just a Developer.
                   <svg
                     className="absolute inset-0 w-full h-full pointer-events-none"
                     xmlns="http://www.w3.org/2000/svg"
@@ -65,12 +65,15 @@ export default function HeroSection() {
                   </svg>
                 </span>
               </h2>
-              <div className="handwritten-text text-2xl lg:text-3xl xl:text-4xl" style={{ color: 'rgb(239 68 68)' }}>
+              <div
+                className="handwritten-text text-2xl lg:text-3xl xl:text-4xl"
+                style={{ color: "rgb(239 68 68)" }}
+              >
                 I Craft Innovations
               </div>
             </div>
             <p className="text-xl lg:text-2xl text-gray-400 leading-relaxed max-w-2xl">
-              I build intelligent applications with{" "}
+              Building intelligent applications with{" "}
               <span className="text-primary font-semibold">scale</span>,
               <span className="text-primary font-semibold"> creativity</span>,
               and

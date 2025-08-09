@@ -33,7 +33,7 @@ export default function SkillSection({
   return (
     <section id={id} className="min-h-screen flex items-center justify-center px-6 lg:px-12 section-snap">
       <div className="max-w-7xl mx-auto w-full">
-        <div className="grid lg:grid-cols-3 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
           <motion.div 
             className={`${contentOrder} space-y-8`}
             initial={{ opacity: 0, x: reverse ? 50 : -50 }}
