@@ -15,6 +15,10 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
   const [agentMode, setAgentMode] = useState<'listening' | 'speaking' | 'idle'>('idle');
   const [error, setError] = useState("");
   const [conversation, setConversation] = useState<any>(null);
+  const [reconnectAttempts, setReconnectAttempts] = useState(0);
+  const [isReconnecting, setIsReconnecting] = useState(false);
+  const maxReconnectAttempts = 3;
+  const reconnectDelayMs = 2000;
 
   // Your personalized agent ID
   const AGENT_ID = "agent_7301k2756861f0zs3jmmf1c6t96s";
@@ -34,42 +38,80 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
     };
   }, [isOpen, conversation]);
 
-  const startConversation = async () => {
+  const startConversation = async (isReconnect = false) => {
     try {
+      if (isReconnect) {
+        setIsReconnecting(true);
+        await new Promise(resolve => setTimeout(resolve, reconnectDelayMs));
+      }
+      
       setConversationStatus('connecting');
       setError("");
 
-      // Request microphone permission first
-      await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Request microphone permission first (only if not reconnecting)
+      if (!isReconnect) {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+      }
 
       const conv = await Conversation.startSession({
         agentId: AGENT_ID,
+        connectionType: 'websocket',
         onConnect: () => {
           console.log('Connected to Satya\'s AI agent');
           setConversationStatus('connected');
           setAgentMode('listening');
+          setReconnectAttempts(0);
+          setIsReconnecting(false);
+          setError("");
         },
         onDisconnect: () => {
           console.log('Disconnected from agent');
           setConversationStatus('disconnected');
           setAgentMode('idle');
+          
+          // Attempt reconnection if modal is still open and we haven't exceeded max attempts
+          if (isOpen && reconnectAttempts < maxReconnectAttempts) {
+            console.log(`Attempting reconnection ${reconnectAttempts + 1}/${maxReconnectAttempts}`);
+            setReconnectAttempts(prev => prev + 1);
+            setError(`Connection lost. Reconnecting... (${reconnectAttempts + 1}/${maxReconnectAttempts})`);
+            setTimeout(() => startConversation(true), 1000);
+          } else if (reconnectAttempts >= maxReconnectAttempts) {
+            setError("Connection failed after multiple attempts. Please try restarting the voice agent.");
+            setIsReconnecting(false);
+          }
         },
-        onModeChange: (mode: string) => {
+        onModeChange: ({ mode }: { mode: string }) => {
           console.log('Agent mode changed to:', mode);
           setAgentMode(mode as 'listening' | 'speaking' | 'idle');
         },
         onError: (error: any) => {
           console.error('Conversation error:', error);
-          setError("Connection error. Please try again.");
-          setConversationStatus('disconnected');
+          
+          // Handle different types of errors
+          if (error.message?.includes('WebSocket')) {
+            setError("Connection interrupted. Reconnecting...");
+            // Don't immediately reconnect on WebSocket errors, let onDisconnect handle it
+          } else if (error.message?.includes('quota') || error.message?.includes('limit')) {
+            setError("Voice service temporarily unavailable. Please try again later.");
+            setConversationStatus('disconnected');
+          } else {
+            setError("Connection error. Please try again.");
+            setConversationStatus('disconnected');
+          }
         }
       });
 
       setConversation(conv);
     } catch (error: any) {
       console.error('Failed to start conversation:', error);
+      setIsReconnecting(false);
+      
       if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
         setError("Microphone access required. Please allow microphone permission and try again.");
+      } else if (error.message?.includes('quota') || error.message?.includes('limit')) {
+        setError("Voice service quota exceeded. Please try again later.");
+      } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+        setError("Network connection error. Please check your internet and try again.");
       } else {
         setError("Failed to connect to voice agent. Please try again.");
       }
@@ -80,13 +122,19 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
   const endConversation = async () => {
     if (conversation) {
       try {
+        console.log('Ending conversation session...');
         await conversation.endSession();
       } catch (error) {
         console.error('Error ending conversation:', error);
+        // Force cleanup even if endSession fails
+      } finally {
+        setConversation(null);
+        setConversationStatus('disconnected');
+        setAgentMode('idle');
+        setReconnectAttempts(0);
+        setIsReconnecting(false);
+        setError("");
       }
-      setConversation(null);
-      setConversationStatus('disconnected');
-      setAgentMode('idle');
     }
   };
 
@@ -184,14 +232,16 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
                 {/* Status Text */}
                 <div className="text-center space-y-2">
                   <h3 className="text-2xl font-semibold text-gray-100">
-                    {conversationStatus === 'connecting' ? "Connecting..." : 
+                    {isReconnecting ? `Reconnecting... (${reconnectAttempts}/${maxReconnectAttempts})` :
+                     conversationStatus === 'connecting' ? "Connecting..." : 
                      conversationStatus === 'connected' && isSpeaking ? "Satya is speaking..." : 
                      conversationStatus === 'connected' && isListening ? "Listening..." :
                      conversationStatus === 'connected' ? "Connected - Ready to talk" :
                      "Voice Agent"}
                   </h3>
                   <p className="text-gray-400">
-                    {conversationStatus === 'connecting' ? "Initializing voice connection..." :
+                    {isReconnecting ? "Attempting to restore voice connection..." :
+                     conversationStatus === 'connecting' ? "Initializing voice connection..." :
                      conversationStatus === 'connected' ? `AI Voice Agent • ${isSpeaking ? 'Speaking' : isListening ? 'Listening' : 'Ready'}` :
                      "AI Voice Agent • Disconnected"}
                   </p>
@@ -203,10 +253,22 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
                     <p className="text-red-200 text-sm">{error}</p>
                     {error.includes("Microphone") && (
                       <button 
-                        onClick={startConversation}
+                        onClick={() => startConversation(false)}
                         className="mt-3 px-4 py-2 bg-red-600/30 hover:bg-red-600/40 rounded-lg text-red-200 text-xs transition-colors"
                       >
                         Try Again
+                      </button>
+                    )}
+                    {error.includes("multiple attempts") && (
+                      <button 
+                        onClick={() => {
+                          setReconnectAttempts(0);
+                          setError("");
+                          startConversation(false);
+                        }}
+                        className="mt-3 px-4 py-2 bg-red-600/30 hover:bg-red-600/40 rounded-lg text-red-200 text-xs transition-colors"
+                      >
+                        Restart Connection
                       </button>
                     )}
                   </div>
