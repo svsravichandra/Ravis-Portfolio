@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mic, MicOff } from "lucide-react";
-import { useState } from "react";
+import { X, Mic, MicOff, Volume2, VolumeX, RefreshCw } from "lucide-react";
+import { useEffect } from "react";
+import { useVoiceAgent } from "@/hooks/use-voice-agent";
 
 interface VoiceAgentModalProps {
   isOpen: boolean;
@@ -8,8 +9,38 @@ interface VoiceAgentModalProps {
 }
 
 export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProps) {
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const {
+    isListening,
+    isSpeaking,
+    transcript,
+    conversationHistory,
+    error,
+    isSupported,
+    startListening,
+    stopListening,
+    stopSpeaking,
+    toggleListening,
+    resetConversation,
+  } = useVoiceAgent();
+
+  // Auto-start listening when modal opens
+  useEffect(() => {
+    if (isOpen && isSupported) {
+      // Give a small delay for modal animation
+      const timer = setTimeout(() => {
+        startListening();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, isSupported, startListening]);
+
+  // Stop everything when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      stopListening();
+      stopSpeaking();
+    }
+  }, [isOpen, stopListening, stopSpeaking]);
 
   return (
     <AnimatePresence>
@@ -38,17 +69,29 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
                 {/* Animated Orb */}
                 <div className="relative w-64 h-64">
                   {/* Outer glow ring */}
-                  <div className={`absolute inset-0 rounded-full ${isSpeaking ? 'animate-pulse' : ''}`}>
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/20 to-cyan-400/20 blur-3xl" />
+                  <div className={`absolute inset-0 rounded-full ${(isSpeaking || isListening) ? 'animate-pulse' : ''}`}>
+                    <div className={`absolute inset-0 rounded-full blur-3xl transition-all duration-500 ${
+                      isListening ? 'bg-gradient-to-br from-red-400/30 to-orange-400/30' :
+                      isSpeaking ? 'bg-gradient-to-br from-blue-400/30 to-cyan-400/30' :
+                      'bg-gradient-to-br from-blue-400/10 to-cyan-400/10'
+                    }`} />
                   </div>
                   
                   {/* Main orb */}
                   <div className="relative w-full h-full rounded-full overflow-hidden">
-                    {/* Gradient background */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-cyan-300 to-white" />
+                    {/* Gradient background - changes color based on state */}
+                    <div className={`absolute inset-0 transition-all duration-500 ${
+                      isListening ? 'bg-gradient-to-br from-red-400 via-orange-300 to-yellow-200' :
+                      isSpeaking ? 'bg-gradient-to-br from-blue-400 via-cyan-300 to-white' :
+                      'bg-gradient-to-br from-gray-400 via-gray-300 to-white'
+                    }`} />
                     
                     {/* Animated clouds/waves effect */}
-                    <div className={`absolute inset-0 ${isSpeaking ? 'voice-wave-active' : 'voice-wave'}`}>
+                    <div className={`absolute inset-0 ${
+                      isSpeaking ? 'voice-wave-active' :
+                      isListening ? 'voice-wave-active' :
+                      'voice-wave'
+                    }`}>
                       <svg className="w-full h-full" viewBox="0 0 200 200">
                         <defs>
                           <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -73,8 +116,8 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
                     {/* Inner highlight */}
                     <div className="absolute top-8 left-8 w-20 h-20 bg-white/40 rounded-full blur-2xl" />
                     
-                    {/* Speaking indicator rings */}
-                    {isSpeaking && (
+                    {/* Activity indicator rings */}
+                    {(isSpeaking || isListening) && (
                       <>
                         <div className="absolute inset-4 rounded-full border-2 border-white/20 animate-ping" />
                         <div className="absolute inset-8 rounded-full border-2 border-white/10 animate-ping animation-delay-200" />
@@ -86,35 +129,70 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
                 {/* Status Text */}
                 <div className="text-center space-y-2">
                   <h3 className="text-2xl font-semibold text-gray-100">
-                    {isSpeaking ? "Satya is speaking..." : "Ask Satya anything"}
+                    {!isSupported ? "Voice Not Supported" :
+                     error ? "Error Occurred" :
+                     isSpeaking ? "Satya is speaking..." :
+                     isListening ? "Listening..." :
+                     "Ask Satya anything"}
                   </h3>
-                  <p className="text-gray-400">
-                    AI Voice Agent • Ready to connect
-                  </p>
+                  
+                  {/* Show transcript or error */}
+                  {transcript && (
+                    <p className="text-gray-300 italic">"{transcript}"</p>
+                  )}
+                  
+                  {error && (
+                    <p className="text-red-400 text-sm">{error}</p>
+                  )}
+                  
+                  {!error && !transcript && (
+                    <p className="text-gray-400">
+                      {isListening ? "Speak now..." : "AI Voice Agent • Ready to connect"}
+                    </p>
+                  )}
                 </div>
 
                 {/* Controls */}
-                <div className="flex items-center gap-8">
+                <div className="flex items-center gap-4">
                   {/* Microphone Button */}
                   <button
-                    onClick={() => setIsMuted(!isMuted)}
-                    className="p-4 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
-                    aria-label={isMuted ? "Unmute" : "Mute"}
+                    onClick={toggleListening}
+                    disabled={!isSupported || isSpeaking}
+                    className={`p-4 rounded-full transition-all ${
+                      isListening 
+                        ? "bg-primary animate-pulse" 
+                        : "bg-gray-800 hover:bg-gray-700"
+                    } ${(!isSupported || isSpeaking) ? "opacity-50 cursor-not-allowed" : ""}`}
+                    aria-label={isListening ? "Stop Listening" : "Start Listening"}
                   >
-                    {isMuted ? (
-                      <MicOff className="w-6 h-6 text-gray-400" />
-                    ) : (
+                    {isListening ? (
                       <Mic className="w-6 h-6 text-white" />
+                    ) : (
+                      <MicOff className="w-6 h-6 text-gray-400" />
                     )}
                   </button>
 
-                  {/* Demo Speaking Toggle (for testing animation) */}
-                  <button
-                    onClick={() => setIsSpeaking(!isSpeaking)}
-                    className="px-6 py-3 rounded-full bg-primary/20 hover:bg-primary/30 text-primary font-medium transition-colors"
-                  >
-                    {isSpeaking ? "Stop Demo" : "Start Demo"}
-                  </button>
+                  {/* Stop Speaking Button (when AI is speaking) */}
+                  {isSpeaking && (
+                    <button
+                      onClick={stopSpeaking}
+                      className="p-4 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
+                      aria-label="Stop Speaking"
+                    >
+                      <VolumeX className="w-6 h-6 text-gray-400" />
+                    </button>
+                  )}
+
+                  {/* Reset Conversation */}
+                  {conversationHistory.length > 0 && (
+                    <button
+                      onClick={resetConversation}
+                      className="p-4 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
+                      aria-label="Reset Conversation"
+                    >
+                      <RefreshCw className="w-6 h-6 text-gray-400" />
+                    </button>
+                  )}
 
                   {/* Close Button */}
                   <button
@@ -125,6 +203,20 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
                     <X className="w-6 h-6 text-gray-400" />
                   </button>
                 </div>
+
+                {/* Conversation History (optional - shows last few messages) */}
+                {conversationHistory.length > 0 && (
+                  <div className="mt-4 max-h-32 overflow-y-auto text-sm text-gray-400 space-y-1">
+                    {conversationHistory.slice(-2).map((msg, idx) => (
+                      <div key={idx} className={msg.role === 'user' ? 'text-right' : 'text-left'}>
+                        <span className={msg.role === 'user' ? 'text-blue-400' : 'text-green-400'}>
+                          {msg.role === 'user' ? 'You: ' : 'Satya: '}
+                        </span>
+                        {msg.content}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
