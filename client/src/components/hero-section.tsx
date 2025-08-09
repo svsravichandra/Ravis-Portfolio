@@ -98,7 +98,7 @@ export default function HeroSection() {
                 variant="outline"
                 className="glass px-8 py-4 rounded-xl font-semibold hover:bg-opacity-20 transition-all duration-300"
                 onClick={() => {
-                  const chatSection = document.getElementById('ravibot');
+                  const chatSection = document.getElementById('chatbot');
                   if (chatSection) {
                     chatSection.scrollIntoView({ behavior: 'smooth' });
                   }
