@@ -27,9 +27,9 @@ export default function SkillSection({
   reverse = false,
   visualComponent
 }: SkillSectionProps) {
-  const contentOrder = reverse ? "order-1 lg:order-2" : "lg:col-span-2";
-  const visualOrder = reverse ? "order-2 lg:order-1" : "";
-  const gridCols = reverse ? "lg:grid-cols-2" : "lg:grid-cols-3";
+  const contentOrder = reverse ? "order-1 lg:order-2 lg:col-span-3" : "lg:col-span-2";
+  const visualOrder = reverse ? "order-2 lg:order-1 lg:col-span-1" : "";
+  const gridCols = reverse ? "lg:grid-cols-4" : "lg:grid-cols-3";
 
   return (
     <section id={id} className="min-h-screen flex items-center justify-center px-6 lg:px-12 section-snap">
