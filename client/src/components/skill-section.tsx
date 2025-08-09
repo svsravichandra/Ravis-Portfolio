@@ -29,11 +29,12 @@ export default function SkillSection({
 }: SkillSectionProps) {
   const contentOrder = reverse ? "order-1 lg:order-2" : "lg:col-span-2";
   const visualOrder = reverse ? "order-2 lg:order-1" : "";
+  const gridCols = reverse ? "lg:grid-cols-2" : "lg:grid-cols-3";
 
   return (
     <section id={id} className="min-h-screen flex items-center justify-center px-6 lg:px-12 section-snap">
       <div className="max-w-7xl mx-auto w-full">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className={`grid ${gridCols} gap-12 items-center`}>
           <motion.div 
             className={`${contentOrder} space-y-8`}
             initial={{ opacity: 0, x: reverse ? 50 : -50 }}
