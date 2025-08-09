@@ -1,15 +1,215 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Mic, MicOff } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface VoiceAgentModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+interface SpeechRecognitionEvent {
+  resultIndex: number;
+  results: {
+    [key: number]: {
+      [key: number]: {
+        transcript: string;
+        confidence: number;
+      };
+      isFinal: boolean;
+    };
+  };
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start(): void;
+  stop(): void;
+  abort(): void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: (event: any) => void;
+  onend: () => void;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition: new () => SpeechRecognition;
+    webkitSpeechRecognition: new () => SpeechRecognition;
+  }
+}
+
 export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const [lastAiResponse, setLastAiResponse] = useState("");
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Chat mutation for getting AI responses
+  const chatMutation = useMutation({
+    mutationFn: async (message: string) => {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to get AI response");
+      }
+      
+      const data = await response.json();
+      return data.response;
+    },
+    onSuccess: async (aiResponse: string) => {
+      setLastAiResponse(aiResponse);
+      await playAiResponse(aiResponse);
+    },
+    onError: (error) => {
+      console.error("Chat error:", error);
+      setLastAiResponse("Sorry, I'm having trouble responding right now.");
+    },
+  });
+
+  // Speech synthesis mutation
+  const speechMutation = useMutation({
+    mutationFn: async (text: string) => {
+      const response = await fetch("/api/speech", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to generate speech");
+      }
+      
+      const audioBlob = await response.blob();
+      return URL.createObjectURL(audioBlob);
+    },
+  });
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      console.warn("Speech recognition not supported");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      let finalTranscript = "";
+      let interimTranscript = "";
+
+      for (let i = event.resultIndex; i < Object.keys(event.results).length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+
+      setTranscript(finalTranscript || interimTranscript);
+
+      if (finalTranscript) {
+        setIsListening(false);
+        chatMutation.mutate(finalTranscript);
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.error("Speech recognition error:", event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recognition;
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, [isOpen]);
+
+  // Play AI response using ElevenLabs
+  const playAiResponse = async (text: string) => {
+    try {
+      setIsSpeaking(true);
+      const audioUrl = await speechMutation.mutateAsync(text);
+      
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      
+      audio.onended = () => {
+        setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+      };
+      
+      await audio.play();
+    } catch (error) {
+      console.error("Error playing AI response:", error);
+      setIsSpeaking(false);
+    }
+  };
+
+  // Toggle listening
+  const toggleListening = () => {
+    if (!recognitionRef.current) return;
+
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      setTranscript("");
+      recognitionRef.current.start();
+      setIsListening(true);
+    }
+  };
+
+  // Stop current speech
+  const stopSpeaking = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setIsSpeaking(false);
+  };
+
+  // Cleanup when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      if (recognitionRef.current && isListening) {
+        recognitionRef.current.stop();
+      }
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      setIsListening(false);
+      setIsSpeaking(false);
+      setTranscript("");
+      setLastAiResponse("");
+    }
+  }, [isOpen]);
 
   return (
     <AnimatePresence>
@@ -86,35 +286,57 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
                 {/* Status Text */}
                 <div className="text-center space-y-2">
                   <h3 className="text-2xl font-semibold text-gray-100">
-                    {isSpeaking ? "Satya is speaking..." : "Ask Satya anything"}
+                    {isSpeaking ? "Satya is speaking..." : 
+                     isListening ? "Listening..." : 
+                     chatMutation.isPending ? "Processing..." :
+                     "Ask Satya anything"}
                   </h3>
                   <p className="text-gray-400">
-                    AI Voice Agent • Ready to connect
+                    {chatMutation.isPending || speechMutation.isPending ? 
+                      "AI Voice Agent • Processing..." : 
+                      "AI Voice Agent • Ready to connect"}
                   </p>
                 </div>
+
+                {/* Transcript Display */}
+                {transcript && (
+                  <div className="text-center p-4 bg-gray-800/50 rounded-xl max-w-md">
+                    <p className="text-gray-300 text-sm">{transcript}</p>
+                  </div>
+                )}
+
+                {/* AI Response Display */}
+                {lastAiResponse && (
+                  <div className="text-center p-4 bg-primary/10 rounded-xl max-w-md">
+                    <p className="text-gray-200 text-sm">{lastAiResponse}</p>
+                  </div>
+                )}
 
                 {/* Controls */}
                 <div className="flex items-center gap-8">
                   {/* Microphone Button */}
                   <button
-                    onClick={() => setIsMuted(!isMuted)}
-                    className="p-4 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
-                    aria-label={isMuted ? "Unmute" : "Mute"}
+                    onClick={toggleListening}
+                    className={`p-4 rounded-full transition-colors ${
+                      isListening 
+                        ? "bg-red-600 hover:bg-red-700 animate-pulse" 
+                        : "bg-gray-800 hover:bg-gray-700"
+                    }`}
+                    aria-label={isListening ? "Stop Listening" : "Start Listening"}
+                    disabled={chatMutation.isPending || speechMutation.isPending}
                   >
-                    {isMuted ? (
-                      <MicOff className="w-6 h-6 text-gray-400" />
-                    ) : (
-                      <Mic className="w-6 h-6 text-white" />
-                    )}
+                    <Mic className={`w-6 h-6 ${isListening ? "text-white" : "text-gray-300"}`} />
                   </button>
 
-                  {/* Demo Speaking Toggle (for testing animation) */}
-                  <button
-                    onClick={() => setIsSpeaking(!isSpeaking)}
-                    className="px-6 py-3 rounded-full bg-primary/20 hover:bg-primary/30 text-primary font-medium transition-colors"
-                  >
-                    {isSpeaking ? "Stop Demo" : "Start Demo"}
-                  </button>
+                  {/* Stop Speaking Button */}
+                  {isSpeaking && (
+                    <button
+                      onClick={stopSpeaking}
+                      className="px-6 py-3 rounded-full bg-red-600/20 hover:bg-red-600/30 text-red-400 font-medium transition-colors"
+                    >
+                      Stop Speaking
+                    </button>
+                  )}
 
                   {/* Close Button */}
                   <button
