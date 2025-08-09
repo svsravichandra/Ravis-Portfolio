@@ -1,230 +1,103 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mic, MicOff } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { X } from "lucide-react";
+import { useState, useEffect } from "react";
+
+// Import ElevenLabs Conversation API
+import { Conversation } from "@elevenlabs/client";
 
 interface VoiceAgentModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface SpeechRecognitionEvent {
-  resultIndex: number;
-  results: {
-    [key: number]: {
-      [key: number]: {
-        transcript: string;
-        confidence: number;
-      };
-      isFinal: boolean;
-    };
-  };
-}
-
-interface SpeechRecognition extends EventTarget {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  start(): void;
-  stop(): void;
-  abort(): void;
-  onresult: (event: SpeechRecognitionEvent) => void;
-  onerror: (event: any) => void;
-  onend: () => void;
-}
-
-declare global {
-  interface Window {
-    SpeechRecognition: new () => SpeechRecognition;
-    webkitSpeechRecognition: new () => SpeechRecognition;
-  }
-}
-
 export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProps) {
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [transcript, setTranscript] = useState("");
-  const [lastAiResponse, setLastAiResponse] = useState("");
-  const [speechError, setSpeechError] = useState("");
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [conversationStatus, setConversationStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
+  const [agentMode, setAgentMode] = useState<'listening' | 'speaking' | 'idle'>('idle');
+  const [error, setError] = useState("");
+  const [conversation, setConversation] = useState<any>(null);
 
-  // Chat mutation for getting AI responses
-  const chatMutation = useMutation({
-    mutationFn: async (message: string) => {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to get AI response");
-      }
-      
-      const data = await response.json();
-      return data.response;
-    },
-    onSuccess: async (aiResponse: string) => {
-      setLastAiResponse(aiResponse);
-      // Try to play audio, but don't fail if it doesn't work
-      try {
-        await playAiResponse(aiResponse);
-      } catch (error) {
-        console.warn("Audio playback failed, showing text response only:", error);
-      }
-    },
-    onError: (error) => {
-      console.error("Chat error:", error);
-      setLastAiResponse("Sorry, I'm having trouble responding right now.");
-    },
-  });
+  // Your personalized agent ID
+  const AGENT_ID = "agent_7301k2756861f0zs3jmmf1c6t96s";
 
-  // Speech synthesis mutation
-  const speechMutation = useMutation({
-    mutationFn: async (text: string) => {
-      const response = await fetch("/api/speech", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to generate speech");
-      }
-      
-      const audioBlob = await response.blob();
-      return URL.createObjectURL(audioBlob);
-    },
-  });
-
-  // Initialize speech recognition
+  // Start conversation when modal opens
   useEffect(() => {
-    if (!isOpen) return;
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      console.warn("Speech recognition not supported");
-      return;
+    if (isOpen && !conversation) {
+      startConversation();
+    } else if (!isOpen && conversation) {
+      endConversation();
     }
-
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.lang = "en-US";
-
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let finalTranscript = "";
-      let interimTranscript = "";
-
-      for (let i = event.resultIndex; i < Object.keys(event.results).length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalTranscript += transcript;
-        } else {
-          interimTranscript += transcript;
-        }
-      }
-
-      setTranscript(finalTranscript || interimTranscript);
-
-      if (finalTranscript) {
-        setIsListening(false);
-        chatMutation.mutate(finalTranscript);
-      }
-    };
-
-    recognition.onerror = (event) => {
-      console.error("Speech recognition error:", event.error);
-      setIsListening(false);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognitionRef.current = recognition;
 
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.abort();
+      if (conversation) {
+        endConversation();
       }
     };
-  }, [isOpen]);
+  }, [isOpen, conversation]);
 
-  // Play AI response using ElevenLabs
-  const playAiResponse = async (text: string) => {
+  const startConversation = async () => {
     try {
-      setSpeechError(""); // Clear any previous errors
-      setIsSpeaking(true);
-      const audioUrl = await speechMutation.mutateAsync(text);
-      
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      
-      const audio = new Audio(audioUrl);
-      audioRef.current = audio;
-      
-      audio.onended = () => {
-        setIsSpeaking(false);
-        URL.revokeObjectURL(audioUrl);
-      };
-      
-      await audio.play();
+      setConversationStatus('connecting');
+      setError("");
+
+      // Request microphone permission first
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      const conv = await Conversation.startSession({
+        agentId: AGENT_ID,
+        onConnect: () => {
+          console.log('Connected to Satya\'s AI agent');
+          setConversationStatus('connected');
+          setAgentMode('listening');
+        },
+        onDisconnect: () => {
+          console.log('Disconnected from agent');
+          setConversationStatus('disconnected');
+          setAgentMode('idle');
+        },
+        onModeChange: (mode: string) => {
+          console.log('Agent mode changed to:', mode);
+          setAgentMode(mode as 'listening' | 'speaking' | 'idle');
+        },
+        onError: (error: any) => {
+          console.error('Conversation error:', error);
+          setError("Connection error. Please try again.");
+          setConversationStatus('disconnected');
+        }
+      });
+
+      setConversation(conv);
     } catch (error: any) {
-      console.error("Error playing AI response:", error);
-      setIsSpeaking(false);
-      
-      // Check if it's a quota exceeded error
-      if (error?.message?.includes("quota") || error?.message?.includes("401")) {
-        setSpeechError("Voice synthesis quota exceeded. Showing text response only.");
+      console.error('Failed to start conversation:', error);
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        setError("Microphone access required. Please allow microphone permission and try again.");
       } else {
-        setSpeechError("Voice synthesis temporarily unavailable. Showing text response only.");
+        setError("Failed to connect to voice agent. Please try again.");
       }
+      setConversationStatus('disconnected');
     }
   };
 
-  // Toggle listening
-  const toggleListening = () => {
-    if (!recognitionRef.current) return;
-
-    if (isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-    } else {
-      setTranscript("");
-      recognitionRef.current.start();
-      setIsListening(true);
+  const endConversation = async () => {
+    if (conversation) {
+      try {
+        await conversation.endSession();
+      } catch (error) {
+        console.error('Error ending conversation:', error);
+      }
+      setConversation(null);
+      setConversationStatus('disconnected');
+      setAgentMode('idle');
     }
   };
 
-  // Stop current speech
-  const stopSpeaking = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-    setIsSpeaking(false);
+  const handleClose = () => {
+    endConversation();
+    onClose();
   };
 
-  // Cleanup when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      if (recognitionRef.current && isListening) {
-        recognitionRef.current.stop();
-      }
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      setIsListening(false);
-      setIsSpeaking(false);
-      setTranscript("");
-      setLastAiResponse("");
-      setSpeechError("");
-    }
-  }, [isOpen]);
+  const isSpeaking = agentMode === 'speaking';
+  const isListening = agentMode === 'listening';
+  const isConnected = conversationStatus === 'connected';
 
   return (
     <AnimatePresence>
@@ -235,7 +108,7 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={handleClose}
             className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
           />
           
@@ -253,14 +126,24 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
                 {/* Animated Orb */}
                 <div className="relative w-64 h-64">
                   {/* Outer glow ring */}
-                  <div className={`absolute inset-0 rounded-full ${isSpeaking ? 'animate-pulse' : ''}`}>
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/20 to-cyan-400/20 blur-3xl" />
+                  <div className={`absolute inset-0 rounded-full ${isSpeaking ? 'animate-pulse' : isListening ? 'animate-ping' : ''}`}>
+                    <div className={`absolute inset-0 rounded-full blur-3xl ${
+                      isSpeaking ? 'bg-gradient-to-br from-blue-400/30 to-cyan-400/30' :
+                      isListening ? 'bg-gradient-to-br from-green-400/20 to-emerald-400/20' :
+                      isConnected ? 'bg-gradient-to-br from-blue-400/10 to-cyan-400/10' :
+                      'bg-gradient-to-br from-gray-400/10 to-gray-500/10'
+                    }`} />
                   </div>
                   
                   {/* Main orb */}
                   <div className="relative w-full h-full rounded-full overflow-hidden">
                     {/* Gradient background */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-cyan-300 to-white" />
+                    <div className={`absolute inset-0 transition-all duration-500 ${
+                      isSpeaking ? 'bg-gradient-to-br from-blue-400 via-cyan-300 to-white' :
+                      isListening ? 'bg-gradient-to-br from-green-400 via-emerald-300 to-white' :
+                      isConnected ? 'bg-gradient-to-br from-blue-400/80 via-cyan-300/80 to-white/80' :
+                      'bg-gradient-to-br from-gray-400 via-gray-300 to-gray-100'
+                    }`} />
                     
                     {/* Animated clouds/waves effect */}
                     <div className={`absolute inset-0 ${isSpeaking ? 'voice-wave-active' : 'voice-wave'}`}>
@@ -288,8 +171,8 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
                     {/* Inner highlight */}
                     <div className="absolute top-8 left-8 w-20 h-20 bg-white/40 rounded-full blur-2xl" />
                     
-                    {/* Speaking indicator rings */}
-                    {isSpeaking && (
+                    {/* Speaking/Listening indicator rings */}
+                    {(isSpeaking || isListening) && (
                       <>
                         <div className="absolute inset-4 rounded-full border-2 border-white/20 animate-ping" />
                         <div className="absolute inset-8 rounded-full border-2 border-white/10 animate-ping animation-delay-200" />
@@ -301,70 +184,62 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
                 {/* Status Text */}
                 <div className="text-center space-y-2">
                   <h3 className="text-2xl font-semibold text-gray-100">
-                    {isSpeaking ? "Satya is speaking..." : 
-                     isListening ? "Listening..." : 
-                     chatMutation.isPending ? "Processing..." :
-                     "Ask Satya anything"}
+                    {conversationStatus === 'connecting' ? "Connecting..." : 
+                     conversationStatus === 'connected' && isSpeaking ? "Satya is speaking..." : 
+                     conversationStatus === 'connected' && isListening ? "Listening..." :
+                     conversationStatus === 'connected' ? "Connected - Ready to talk" :
+                     "Voice Agent"}
                   </h3>
                   <p className="text-gray-400">
-                    {chatMutation.isPending || speechMutation.isPending ? 
-                      "AI Voice Agent • Processing..." : 
-                      speechError ? 
-                        "AI Voice Agent • Text-only mode" :
-                        "AI Voice Agent • Ready to connect"}
+                    {conversationStatus === 'connecting' ? "Initializing voice connection..." :
+                     conversationStatus === 'connected' ? `AI Voice Agent • ${isSpeaking ? 'Speaking' : isListening ? 'Listening' : 'Ready'}` :
+                     "AI Voice Agent • Disconnected"}
                   </p>
                 </div>
 
-                {/* Transcript Display */}
-                {transcript && (
-                  <div className="text-center p-4 bg-gray-800/50 rounded-xl max-w-md">
-                    <p className="text-gray-300 text-sm">{transcript}</p>
+                {/* Error Display */}
+                {error && (
+                  <div className="text-center p-4 bg-red-600/20 border border-red-500/30 rounded-xl max-w-md">
+                    <p className="text-red-200 text-sm">{error}</p>
+                    {error.includes("Microphone") && (
+                      <button 
+                        onClick={startConversation}
+                        className="mt-3 px-4 py-2 bg-red-600/30 hover:bg-red-600/40 rounded-lg text-red-200 text-xs transition-colors"
+                      >
+                        Try Again
+                      </button>
+                    )}
                   </div>
                 )}
 
-                {/* AI Response Display */}
-                {lastAiResponse && (
-                  <div className="text-center p-4 bg-primary/10 rounded-xl max-w-md">
-                    <p className="text-gray-200 text-sm">{lastAiResponse}</p>
-                  </div>
-                )}
-
-                {/* Speech Error Display */}
-                {speechError && (
-                  <div className="text-center p-3 bg-yellow-600/20 border border-yellow-500/30 rounded-xl max-w-md">
-                    <p className="text-yellow-200 text-xs">{speechError}</p>
+                {/* Instructions */}
+                {conversationStatus === 'connected' && !error && (
+                  <div className="text-center p-4 bg-blue-600/20 border border-blue-500/30 rounded-xl max-w-md">
+                    <p className="text-blue-200 text-sm">
+                      🎙️ Speak naturally - I'm Satya's personalized AI assistant and I'll respond with voice
+                    </p>
                   </div>
                 )}
 
                 {/* Controls */}
-                <div className="flex items-center gap-8">
-                  {/* Microphone Button */}
-                  <button
-                    onClick={toggleListening}
-                    className={`p-4 rounded-full transition-colors ${
-                      isListening 
-                        ? "bg-red-600 hover:bg-red-700 animate-pulse" 
-                        : "bg-gray-800 hover:bg-gray-700"
-                    }`}
-                    aria-label={isListening ? "Stop Listening" : "Start Listening"}
-                    disabled={chatMutation.isPending || speechMutation.isPending}
-                  >
-                    <Mic className={`w-6 h-6 ${isListening ? "text-white" : "text-gray-300"}`} />
-                  </button>
-
-                  {/* Stop Speaking Button */}
-                  {isSpeaking && (
-                    <button
-                      onClick={stopSpeaking}
-                      className="px-6 py-3 rounded-full bg-red-600/20 hover:bg-red-600/30 text-red-400 font-medium transition-colors"
-                    >
-                      Stop Speaking
-                    </button>
-                  )}
+                <div className="flex items-center gap-4">
+                  {/* Connection Status Indicator */}
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${
+                      conversationStatus === 'connected' ? 'bg-green-400' : 
+                      conversationStatus === 'connecting' ? 'bg-yellow-400' : 
+                      'bg-red-400'
+                    }`} />
+                    <span className="text-xs text-gray-400">
+                      {conversationStatus === 'connected' ? 'Connected' : 
+                       conversationStatus === 'connecting' ? 'Connecting' : 
+                       'Disconnected'}
+                    </span>
+                  </div>
 
                   {/* Close Button */}
                   <button
-                    onClick={onClose}
+                    onClick={handleClose}
                     className="p-4 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors"
                     aria-label="Close"
                   >

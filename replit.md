@@ -69,9 +69,10 @@ Preferred communication style: Simple, everyday language.
 - **Development Tools**: TSX for TypeScript execution and hot reloading
 
 ### AI Integration
-- **AI Provider**: OpenAI API for chat functionality using GPT-4o model
-- **Chat Interface**: Custom React components with real-time message handling
-- **Error Handling**: Graceful fallbacks for AI service unavailability
+- **AI Provider**: ElevenLabs Conversational Agent (agent_7301k2756861f0zs3jmmf1c6t96s) for personalized voice interactions
+- **Voice Interface**: Real-time conversational AI with integrated speech recognition, processing, and synthesis
+- **Conversation Flow**: Natural turn-taking with ~75ms latency for seamless voice interactions
+- **Fallback Handling**: Graceful error handling for microphone permissions and connectivity issues
 
 ### Development Tools
 - **Build System**: Vite with React plugin for fast development and production builds
