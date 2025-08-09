@@ -1,9 +1,13 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import portraitImage from "@assets/ChatGPT Image Aug 8, 2025, 04_52_14 AM_1754660498096.png";
+import VoiceAgentModal from "./voice-agent-modal";
 
 export default function HeroSection() {
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   return (
+    <>
     <section
       id="hero"
       className="min-h-screen flex items-center justify-center px-6 lg:px-12 section-snap"
@@ -91,7 +95,10 @@ export default function HeroSection() {
             </div>
 
             <div className="flex space-x-4">
-              <Button className="bg-primary text-dark px-8 py-4 rounded-xl font-semibold hover:bg-opacity-90 transition-all duration-300 btn-glow">
+              <Button 
+                className="bg-primary text-dark px-8 py-4 rounded-xl font-semibold hover:bg-opacity-90 transition-all duration-300 btn-glow"
+                onClick={() => setIsVoiceModalOpen(true)}
+              >
                 Let's Connect
               </Button>
               <Button
@@ -111,5 +118,12 @@ export default function HeroSection() {
         </div>
       </div>
     </section>
+    
+    {/* Voice Agent Modal */}
+    <VoiceAgentModal 
+      isOpen={isVoiceModalOpen} 
+      onClose={() => setIsVoiceModalOpen(false)} 
+    />
+    </>
   );
 }
