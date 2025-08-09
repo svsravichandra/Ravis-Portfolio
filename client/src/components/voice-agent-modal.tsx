@@ -46,6 +46,7 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [lastAiResponse, setLastAiResponse] = useState("");
+  const [speechError, setSpeechError] = useState("");
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -67,7 +68,12 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
     },
     onSuccess: async (aiResponse: string) => {
       setLastAiResponse(aiResponse);
-      await playAiResponse(aiResponse);
+      // Try to play audio, but don't fail if it doesn't work
+      try {
+        await playAiResponse(aiResponse);
+      } catch (error) {
+        console.warn("Audio playback failed, showing text response only:", error);
+      }
     },
     onError: (error) => {
       console.error("Chat error:", error);
@@ -150,6 +156,7 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
   // Play AI response using ElevenLabs
   const playAiResponse = async (text: string) => {
     try {
+      setSpeechError(""); // Clear any previous errors
       setIsSpeaking(true);
       const audioUrl = await speechMutation.mutateAsync(text);
       
@@ -166,9 +173,16 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
       };
       
       await audio.play();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error playing AI response:", error);
       setIsSpeaking(false);
+      
+      // Check if it's a quota exceeded error
+      if (error?.message?.includes("quota") || error?.message?.includes("401")) {
+        setSpeechError("Voice synthesis quota exceeded. Showing text response only.");
+      } else {
+        setSpeechError("Voice synthesis temporarily unavailable. Showing text response only.");
+      }
     }
   };
 
@@ -208,6 +222,7 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
       setIsSpeaking(false);
       setTranscript("");
       setLastAiResponse("");
+      setSpeechError("");
     }
   }, [isOpen]);
 
@@ -294,7 +309,9 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
                   <p className="text-gray-400">
                     {chatMutation.isPending || speechMutation.isPending ? 
                       "AI Voice Agent • Processing..." : 
-                      "AI Voice Agent • Ready to connect"}
+                      speechError ? 
+                        "AI Voice Agent • Text-only mode" :
+                        "AI Voice Agent • Ready to connect"}
                   </p>
                 </div>
 
@@ -309,6 +326,13 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
                 {lastAiResponse && (
                   <div className="text-center p-4 bg-primary/10 rounded-xl max-w-md">
                     <p className="text-gray-200 text-sm">{lastAiResponse}</p>
+                  </div>
+                )}
+
+                {/* Speech Error Display */}
+                {speechError && (
+                  <div className="text-center p-3 bg-yellow-600/20 border border-yellow-500/30 rounded-xl max-w-md">
+                    <p className="text-yellow-200 text-xs">{speechError}</p>
                   </div>
                 )}
 
