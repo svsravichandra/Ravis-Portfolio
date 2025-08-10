@@ -119,6 +119,30 @@
       opacity: 0;
     }
   }
+
+  /* Hexagonal background optimizations */
+  .hexagonal-background {
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+  }
+
+  .hexagonal-background svg {
+    will-change: transform, opacity;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+
+  /* Smooth hexagon transitions */
+  .hexagon-cell {
+    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+    will-change: transform, opacity, filter;
+  }
+
+  .hexagon-cell:hover {
+    transform: scale(1.05);
+  }
 }
 
 @layer utilities {
