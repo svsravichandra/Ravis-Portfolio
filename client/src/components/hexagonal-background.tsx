@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 
 export default function HexagonalBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -6,30 +6,36 @@ export default function HexagonalBackground() {
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        setMousePosition({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
-        });
-      }
+      setMousePosition({
+        x: e.clientX,
+        y: e.clientY
+      });
     };
 
-    const container = containerRef.current;
-    if (container) {
-      container.addEventListener('mousemove', handleMouseMove);
-      return () => container.removeEventListener('mousemove', handleMouseMove);
-    }
+    // Listen to window mouse events instead of container
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  // Generate hexagonal pattern
-  const hexSize = 40;
-  const hexWidth = hexSize * 2;
-  const hexHeight = hexSize * Math.sqrt(3);
-  const horizontalSpacing = hexWidth * 0.75;
-  const verticalSpacing = hexHeight;
+  // Generate hexagonal pattern - memoized for performance
+  const hexagons = useMemo(() => {
+    const hexSize = 40;
+    const hexWidth = hexSize * 2;
+    const hexHeight = hexSize * Math.sqrt(3);
+    const horizontalSpacing = hexWidth * 0.75;
+    const verticalSpacing = hexHeight;
 
-  const generateHexagons = () => {
+    const getHexagonPoints = (centerX: number, centerY: number, size: number) => {
+      const points = [];
+      for (let i = 0; i < 6; i++) {
+        const angle = (i * Math.PI) / 3;
+        const x = centerX + size * Math.cos(angle);
+        const y = centerY + size * Math.sin(angle);
+        points.push(`${x},${y}`);
+      }
+      return points.join(' ');
+    };
+
     const hexagons = [];
     const cols = Math.ceil(window.innerWidth / horizontalSpacing) + 2;
     const rows = Math.ceil(window.innerHeight / verticalSpacing) + 2;
@@ -48,26 +54,13 @@ export default function HexagonalBackground() {
       }
     }
     return hexagons;
-  };
-
-  const getHexagonPoints = (centerX: number, centerY: number, size: number) => {
-    const points = [];
-    for (let i = 0; i < 6; i++) {
-      const angle = (i * Math.PI) / 3;
-      const x = centerX + size * Math.cos(angle);
-      const y = centerY + size * Math.sin(angle);
-      points.push(`${x},${y}`);
-    }
-    return points.join(' ');
-  };
+  }, []);
 
   const getDistanceFromMouse = (hexX: number, hexY: number) => {
     const dx = mousePosition.x - hexX;
     const dy = mousePosition.y - hexY;
     return Math.sqrt(dx * dx + dy * dy);
   };
-
-  const hexagons = generateHexagons();
 
   return (
     <div
@@ -172,6 +165,16 @@ export default function HexagonalBackground() {
             rgba(59, 130, 246, 0.02) 0%, 
             rgba(0, 0, 0, 0.05) 50%, 
             rgba(0, 0, 0, 0.08) 100%)`
+        }}
+      />
+      
+      {/* Debug cursor position indicator */}
+      <div 
+        className="fixed w-6 h-6 rounded-full bg-cyan-500/30 border-2 border-cyan-400 pointer-events-none z-50"
+        style={{
+          left: mousePosition.x - 12,
+          top: mousePosition.y - 12,
+          boxShadow: '0 0 20px rgba(0, 255, 255, 0.5)'
         }}
       />
     </div>
