@@ -198,13 +198,7 @@ export default function ChatbotSection() {
             </div>
           </div>
 
-          {/* Quote */}
-          <div className="glass rounded-2xl p-6 border-l-4 border-primary max-w-3xl mx-auto mt-8">
-            <blockquote className="text-lg italic text-gray-300 text-center">
-              "Any sufficiently advanced technology is indistinguishable from magic."
-            </blockquote>
-            <cite className="text-primary font-semibold mt-2 block text-center">– Arthur C. Clarke</cite>
-          </div>
+          
         </motion.div>
       </div>
     </section>
