@@ -7,6 +7,55 @@ export default function HexagonalBackground() {
   const [waveCenter, setWaveCenter] = useState({ x: 0, y: 0 });
   const [waveTime, setWaveTime] = useState(0);
   const [isMouseActive, setIsMouseActive] = useState(false);
+  const [textElements, setTextElements] = useState<DOMRect[]>([]);
+
+  // Track text elements for proximity detection
+  useEffect(() => {
+    const updateTextElements = () => {
+      // Select all text elements that should have proximity zones
+      const selectors = [
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+        'p:not(.no-proximity)', 'span:not(.no-proximity)', 
+        'a:not(.no-proximity)', 'button:not(.no-proximity)', 
+        'label:not(.no-proximity)', 'li:not(.no-proximity)',
+        '.text-content', '[data-text-element]'
+      ];
+      
+      const elements = document.querySelectorAll(selectors.join(', '));
+      const rects: DOMRect[] = [];
+      
+      elements.forEach(el => {
+        // Skip elements that are images or have background images
+        const hasImage = el.tagName === 'IMG' || 
+                        el.querySelector('img') || 
+                        getComputedStyle(el).backgroundImage !== 'none';
+        
+        if (!hasImage) {
+          const rect = el.getBoundingClientRect();
+          // Only include visible elements
+          if (rect.width > 0 && rect.height > 0) {
+            rects.push(rect);
+          }
+        }
+      });
+      
+      setTextElements(rects);
+    };
+
+    // Update on load and resize
+    updateTextElements();
+    window.addEventListener('resize', updateTextElements);
+    window.addEventListener('scroll', updateTextElements);
+    
+    // Update periodically to catch dynamic content
+    const interval = setInterval(updateTextElements, 1000);
+    
+    return () => {
+      window.removeEventListener('resize', updateTextElements);
+      window.removeEventListener('scroll', updateTextElements);
+      clearInterval(interval);
+    };
+  }, []);
 
   useEffect(() => {
     // Better mobile detection - only consider it mobile if there's NO mouse events
@@ -187,6 +236,42 @@ export default function HexagonalBackground() {
     }
   };
 
+  // Check if a point is near any text element (within 15px proximity)
+  const isNearText = (x: number, y: number, proximityDistance: number = 15) => {
+    let minFadeFactor = 1; // Start with full intensity
+    
+    for (const rect of textElements) {
+      // Calculate distance to rectangle
+      let dx = 0;
+      let dy = 0;
+      
+      if (x < rect.left) {
+        dx = rect.left - x;
+      } else if (x > rect.right) {
+        dx = x - rect.right;
+      }
+      
+      if (y < rect.top) {
+        dy = rect.top - y;
+      } else if (y > rect.bottom) {
+        dy = y - rect.bottom;
+      }
+      
+      // Calculate Euclidean distance to rectangle
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      // If within proximity distance, calculate fade
+      if (distance <= proximityDistance) {
+        // Smooth cubic fade curve for better visual effect
+        const normalizedDistance = distance / proximityDistance;
+        const fadeFactor = normalizedDistance * normalizedDistance * normalizedDistance;
+        minFadeFactor = Math.min(minFadeFactor, fadeFactor);
+      }
+    }
+    
+    return minFadeFactor; // Return the strongest fade effect
+  };
+
   return (
     <div
       ref={containerRef}
@@ -236,7 +321,14 @@ export default function HexagonalBackground() {
           const useWave = isMobile || !isMouseActive;
           const maxDistance = useWave ? 200 : 120; // Larger radius for wave effect
           const isActive = distance < maxDistance;
-          const intensity = isActive ? Math.max(0, 1 - distance / maxDistance) : 0;
+          let intensity = isActive ? Math.max(0, 1 - distance / maxDistance) : 0;
+          
+          // Apply text proximity fade with 15px zone
+          const textProximityFade = isNearText(hex.x, hex.y, 15);
+          intensity *= textProximityFade;
+          
+          // Also reduce base opacity near text
+          const baseOpacity = isActive ? (0.8 * textProximityFade) : 0.3;
           
           return (
             <g key={hex.id}>
@@ -244,10 +336,10 @@ export default function HexagonalBackground() {
               <polygon
                 points={hex.points}
                 fill={isActive ? "rgba(0, 255, 150, 0.03)" : "rgba(255, 255, 255, 0.008)"}
-                stroke={isActive ? "rgba(0, 255, 150, 0.4)" : "rgba(255, 255, 255, 0.06)"}
+                stroke={isActive ? `rgba(0, 255, 150, ${0.4 * textProximityFade})` : "rgba(255, 255, 255, 0.06)"}
                 strokeWidth={isActive ? 1 : 0.3}
-                opacity={isActive ? 0.8 : 0.3}
-                filter={isActive ? "url(#hexGlowActive)" : "none"}
+                opacity={baseOpacity}
+                filter={isActive && textProximityFade > 0.5 ? "url(#hexGlowActive)" : "none"}
                 className="transition-all duration-500 ease-out"
                 style={{
                   transform: isActive ? `scale(${1 + intensity * 0.05})` : 'scale(1)',
