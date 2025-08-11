@@ -17,32 +17,32 @@ export default function HexagonalBackground() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  // Skills data with copyright-safe representations
+  // Skills data with icons
   const skills = [
-    { name: 'HTML', abbrev: 'H5', color: '#E34F26', shape: 'square' },
-    { name: 'CSS', abbrev: 'C3', color: '#1572B6', shape: 'triangle' },
-    { name: 'JavaScript', abbrev: 'JS', color: '#F7DF1E', shape: 'circle' },
-    { name: 'React', abbrev: 'R', color: '#61DAFB', shape: 'hexagon' },
-    { name: 'Node.js', abbrev: 'N', color: '#339933', shape: 'diamond' },
-    { name: 'Python', abbrev: 'PY', color: '#3776AB', shape: 'octagon' },
-    { name: 'Git', abbrev: 'Git', color: '#F05032', shape: 'square' },
-    { name: 'Docker', abbrev: 'D', color: '#2496ED', shape: 'circle' },
-    { name: 'AWS', abbrev: 'AWS', color: '#FF9900', shape: 'triangle' },
-    { name: 'TypeScript', abbrev: 'TS', color: '#3178C6', shape: 'diamond' },
-    { name: 'Vue.js', abbrev: 'V', color: '#4FC08D', shape: 'hexagon' },
-    { name: 'Angular', abbrev: 'A', color: '#DD0031', shape: 'octagon' },
-    { name: 'Sass', abbrev: 'S', color: '#CC6699', shape: 'square' },
-    { name: 'Tailwind', abbrev: 'TW', color: '#06B6D4', shape: 'circle' },
-    { name: 'Next.js', abbrev: 'NX', color: '#000000', shape: 'triangle' },
-    { name: 'GraphQL', abbrev: 'GQ', color: '#E10098', shape: 'diamond' },
-    { name: 'MongoDB', abbrev: 'M', color: '#47A248', shape: 'hexagon' },
-    { name: 'PostgreSQL', abbrev: 'PG', color: '#336791', shape: 'octagon' },
-    { name: 'Redis', abbrev: 'R', color: '#DC382D', shape: 'square' },
-    { name: 'API', abbrev: 'API', color: '#FF6B6B', shape: 'circle' },
-    { name: 'Mobile', abbrev: 'M', color: '#4ECDC4', shape: 'triangle' },
-    { name: 'Cloud', abbrev: 'C', color: '#45B7D1', shape: 'diamond' },
-    { name: 'AI/ML', abbrev: 'AI', color: '#9B59B6', shape: 'hexagon' },
-    { name: 'Analytics', abbrev: 'A', color: '#E67E22', shape: 'octagon' }
+    { name: 'HTML5', icon: 'fab fa-html5', color: '#E34F26' },
+    { name: 'CSS3', icon: 'fab fa-css3-alt', color: '#1572B6' },
+    { name: 'JavaScript', icon: 'fab fa-js-square', color: '#F7DF1E' },
+    { name: 'React', icon: 'fab fa-react', color: '#61DAFB' },
+    { name: 'Node.js', icon: 'fab fa-node-js', color: '#339933' },
+    { name: 'Python', icon: 'fab fa-python', color: '#3776AB' },
+    { name: 'Git', icon: 'fab fa-git-alt', color: '#F05032' },
+    { name: 'Docker', icon: 'fab fa-docker', color: '#2496ED' },
+    { name: 'AWS', icon: 'fab fa-aws', color: '#FF9900' },
+    { name: 'TypeScript', icon: 'fas fa-code', color: '#3178C6' },
+    { name: 'Vue.js', icon: 'fab fa-vuejs', color: '#4FC08D' },
+    { name: 'Angular', icon: 'fab fa-angular', color: '#DD0031' },
+    { name: 'Sass', icon: 'fab fa-sass', color: '#CC6699' },
+    { name: 'Bootstrap', icon: 'fab fa-bootstrap', color: '#7952B3' },
+    { name: 'WordPress', icon: 'fab fa-wordpress', color: '#21759B' },
+    { name: 'GitHub', icon: 'fab fa-github', color: '#181717' },
+    { name: 'NPM', icon: 'fab fa-npm', color: '#CB3837' },
+    { name: 'Linux', icon: 'fab fa-linux', color: '#FCC624' },
+    { name: 'Database', icon: 'fas fa-database', color: '#336791' },
+    { name: 'API', icon: 'fas fa-plug', color: '#FF6B6B' },
+    { name: 'Mobile', icon: 'fas fa-mobile-alt', color: '#4ECDC4' },
+    { name: 'Cloud', icon: 'fas fa-cloud', color: '#45B7D1' },
+    { name: 'AI/ML', icon: 'fas fa-brain', color: '#9B59B6' },
+    { name: 'Analytics', icon: 'fas fa-chart-line', color: '#E67E22' }
   ];
 
   // Generate hexagonal pattern - memoized for performance
@@ -93,46 +93,6 @@ export default function HexagonalBackground() {
     const dx = mousePosition.x - hexX;
     const dy = mousePosition.y - hexY;
     return Math.sqrt(dx * dx + dy * dy);
-  };
-
-  // Render geometric shapes for skills
-  const renderSkillShape = (skill: any, size: number = 20) => {
-    const shapeProps = {
-      fill: skill.color,
-      strokeWidth: 1,
-      stroke: 'rgba(255, 255, 255, 0.3)'
-    };
-
-    switch (skill.shape) {
-      case 'circle':
-        return <circle cx={size/2} cy={size/2} r={size/3} {...shapeProps} />;
-      case 'square':
-        return <rect x={size/6} y={size/6} width={size*2/3} height={size*2/3} {...shapeProps} />;
-      case 'triangle':
-        return <polygon points={`${size/2},${size/6} ${size*5/6},${size*5/6} ${size/6},${size*5/6}`} {...shapeProps} />;
-      case 'diamond':
-        return <polygon points={`${size/2},${size/6} ${size*5/6},${size/2} ${size/2},${size*5/6} ${size/6},${size/2}`} {...shapeProps} />;
-      case 'hexagon':
-        const hexPoints = [];
-        for (let i = 0; i < 6; i++) {
-          const angle = (i * Math.PI) / 3;
-          const x = size/2 + (size/3) * Math.cos(angle);
-          const y = size/2 + (size/3) * Math.sin(angle);
-          hexPoints.push(`${x},${y}`);
-        }
-        return <polygon points={hexPoints.join(' ')} {...shapeProps} />;
-      case 'octagon':
-        const octPoints = [];
-        for (let i = 0; i < 8; i++) {
-          const angle = (i * Math.PI) / 4;
-          const x = size/2 + (size/3) * Math.cos(angle);
-          const y = size/2 + (size/3) * Math.sin(angle);
-          octPoints.push(`${x},${y}`);
-        }
-        return <polygon points={octPoints.join(' ')} {...shapeProps} />;
-      default:
-        return <circle cx={size/2} cy={size/2} r={size/3} {...shapeProps} />;
-    }
   };
 
   return (
@@ -202,40 +162,29 @@ export default function HexagonalBackground() {
                 }}
               />
               
-              {/* Skill shape and text using SVG */}
-              <g 
-                className="pointer-events-none transition-all duration-300"
+              {/* Skill icon using foreignObject */}
+              <foreignObject
+                x={hex.x - 12}
+                y={hex.y - 12}
+                width="24"
+                height="24"
+                className="pointer-events-none"
                 style={{
                   transform: isActive ? `scale(${1 + intensity * 0.2})` : 'scale(1)',
-                  transformOrigin: `${hex.x}px ${hex.y}px`,
+                  transformOrigin: 'center',
                 }}
               >
-                {/* Background shape */}
-                <g 
-                  transform={`translate(${hex.x - 12}, ${hex.y - 12})`}
-                  opacity={isActive ? 0.7 + intensity * 0.3 : 0.4}
-                  filter={isActive ? "url(#hexGlow)" : "none"}
-                >
-                  {renderSkillShape(hex.skill, 24)}
-                </g>
-                
-                {/* Text abbreviation */}
-                <text
-                  x={hex.x}
-                  y={hex.y}
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                  className="font-bold transition-all duration-300"
-                  style={{
-                    fontSize: hex.skill.abbrev.length > 2 ? '8px' : '10px',
-                    fill: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.8)',
-                    filter: isActive ? `drop-shadow(0 0 ${intensity * 4}px ${hex.skill.color})` : 'none',
-                    opacity: isActive ? 0.9 + intensity * 0.1 : 0.6
-                  }}
-                >
-                  {hex.skill.abbrev}
-                </text>
-              </g>
+                <div className="w-full h-full flex items-center justify-center">
+                  <i 
+                    className={`${hex.skill.icon} text-lg transition-all duration-300`}
+                    style={{
+                      color: isActive ? hex.skill.color : `${hex.skill.color}80`,
+                      filter: isActive ? `drop-shadow(0 0 ${intensity * 8}px ${hex.skill.color})` : 'none',
+                      opacity: isActive ? 0.8 + intensity * 0.2 : 0.4
+                    }}
+                  />
+                </div>
+              </foreignObject>
               
               {/* Enhanced glow ring for active hexagons */}
               {isActive && intensity > 0.4 && (
