@@ -141,78 +141,89 @@ export default function HexagonalBackground() {
 
         {hexagons.map((hex) => {
           const distance = getDistanceFromMouse(hex.x, hex.y);
-          const maxDistance = 150;
+          const maxDistance = 120;
           const isActive = distance < maxDistance;
           const intensity = isActive ? Math.max(0, 1 - distance / maxDistance) : 0;
           
           return (
             <g key={hex.id}>
-              {/* Base hexagon */}
+              {/* Base hexagon - subtle and professional */}
               <polygon
                 points={hex.points}
-                fill={isActive ? `${hex.skill.color}20` : "rgba(255, 255, 255, 0.02)"}
-                stroke={isActive ? "url(#neonGradientActive)" : "url(#neonGradient)"}
-                strokeWidth={isActive ? 1.5 : 0.5}
-                opacity={isActive ? 0.6 + intensity * 0.4 : 0.25}
-                filter={isActive ? "url(#hexGlowActive)" : "url(#hexGlow)"}
-                className="transition-all duration-300 ease-out"
+                fill={isActive ? "rgba(0, 255, 150, 0.03)" : "rgba(255, 255, 255, 0.008)"}
+                stroke={isActive ? "rgba(0, 255, 150, 0.4)" : "rgba(255, 255, 255, 0.06)"}
+                strokeWidth={isActive ? 1 : 0.3}
+                opacity={isActive ? 0.8 : 0.3}
+                filter={isActive ? "url(#hexGlowActive)" : "none"}
+                className="transition-all duration-500 ease-out"
                 style={{
-                  transform: isActive ? `scale(${1 + intensity * 0.08})` : 'scale(1)',
+                  transform: isActive ? `scale(${1 + intensity * 0.05})` : 'scale(1)',
                   transformOrigin: `${hex.x}px ${hex.y}px`
                 }}
               />
               
-              {/* Skill icon using foreignObject */}
+              {/* Skill icon - monochromatic, only visible on hover */}
               <foreignObject
-                x={hex.x - 12}
-                y={hex.y - 12}
-                width="24"
-                height="24"
+                x={hex.x - 10}
+                y={hex.y - 10}
+                width="20"
+                height="20"
                 className="pointer-events-none"
                 style={{
-                  transform: isActive ? `scale(${1 + intensity * 0.2})` : 'scale(1)',
+                  transform: isActive ? `scale(${1 + intensity * 0.15})` : 'scale(0.8)',
                   transformOrigin: 'center',
+                  opacity: isActive ? intensity : 0
                 }}
               >
                 <div className="w-full h-full flex items-center justify-center">
                   <i 
-                    className={`${hex.skill.icon} text-lg transition-all duration-300`}
+                    className={`${hex.skill.icon} text-sm transition-all duration-500`}
                     style={{
-                      color: isActive ? hex.skill.color : `${hex.skill.color}80`,
-                      filter: isActive ? `drop-shadow(0 0 ${intensity * 8}px ${hex.skill.color})` : 'none',
-                      opacity: isActive ? 0.8 + intensity * 0.2 : 0.4
+                      color: '#ffffff',
+                      filter: isActive ? `drop-shadow(0 0 ${intensity * 12}px rgba(0, 255, 150, 0.8)) drop-shadow(0 0 ${intensity * 6}px rgba(0, 255, 150, 0.6))` : 'none',
+                      textShadow: isActive ? `0 0 ${intensity * 8}px rgba(0, 255, 150, 0.7)` : 'none'
                     }}
                   />
                 </div>
               </foreignObject>
               
-              {/* Enhanced glow ring for active hexagons */}
-              {isActive && intensity > 0.4 && (
-                <circle
-                  cx={hex.x}
-                  cy={hex.y}
-                  r={30}
-                  fill="none"
-                  stroke={hex.skill.color}
-                  strokeWidth={1}
-                  opacity={intensity * 0.3}
-                  filter="url(#hexGlow)"
-                  className="transition-all duration-200 ease-out"
-                />
+              {/* Subtle skill name tooltip on high intensity hover */}
+              {isActive && intensity > 0.7 && (
+                <foreignObject
+                  x={hex.x - 25}
+                  y={hex.y + 20}
+                  width="50"
+                  height="16"
+                  className="pointer-events-none"
+                  style={{ opacity: (intensity - 0.7) * 3 }}
+                >
+                  <div className="w-full flex justify-center">
+                    <span 
+                      className="text-xs font-medium px-2 py-1 rounded-full bg-black/40 backdrop-blur-sm"
+                      style={{
+                        color: 'rgba(0, 255, 150, 0.9)',
+                        textShadow: '0 0 4px rgba(0, 255, 150, 0.5)',
+                        border: '1px solid rgba(0, 255, 150, 0.2)'
+                      }}
+                    >
+                      {hex.skill.name}
+                    </span>
+                  </div>
+                </foreignObject>
               )}
             </g>
           );
         })}
       </svg>
 
-      {/* Overlay for subtle background darkening */}
+      {/* Subtle professional overlay */}
       <div 
-        className="absolute inset-0 bg-black/5 pointer-events-none"
+        className="absolute inset-0 bg-black/2 pointer-events-none"
         style={{
-          background: `radial-gradient(600px circle at ${mousePosition.x}px ${mousePosition.y}px, 
-            rgba(59, 130, 246, 0.02) 0%, 
-            rgba(0, 0, 0, 0.05) 50%, 
-            rgba(0, 0, 0, 0.08) 100%)`
+          background: `radial-gradient(400px circle at ${mousePosition.x}px ${mousePosition.y}px, 
+            rgba(0, 255, 150, 0.008) 0%, 
+            rgba(0, 0, 0, 0.02) 40%, 
+            rgba(0, 0, 0, 0.05) 100%)`
         }}
       />
       
