@@ -74,6 +74,13 @@ Preferred communication style: Simple, everyday language.
 - **Conversation Flow**: Natural turn-taking with ~75ms latency for seamless voice interactions
 - **Fallback Handling**: Graceful error handling for microphone permissions and connectivity issues
 
+### Interactive Background Features
+- **Hexagonal Grid**: Dynamic SVG-based honeycomb pattern with skill icons (HTML5, React, Python, TensorFlow, etc.)
+- **Cursor Interaction**: Desktop devices track mouse position for hover effects with green neon glow
+- **Mobile Optimization**: Automatic wave animations flow across hexagons when no cursor is detected
+- **Smart Device Detection**: Fixed mobile detection logic to properly distinguish between desktop and mobile devices (Jan 2025)
+- **Performance**: Optimized rendering with conditional animation modes for smooth 60fps interactions
+
 ### Development Tools
 - **Build System**: Vite with React plugin for fast development and production builds
 - **Code Quality**: TypeScript strict mode for compile-time error detection

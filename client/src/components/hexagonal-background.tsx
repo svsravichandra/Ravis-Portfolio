@@ -323,24 +323,6 @@ export default function HexagonalBackground() {
             rgba(0, 0, 0, 0.05) 100%)`
         }}
       />
-      
-      {/* Debug: Visual cursor position indicator */}
-      <div 
-        className="fixed w-4 h-4 rounded-full border-2 border-red-500 bg-red-500/20 pointer-events-none z-[9999]"
-        style={{
-          left: mousePosition.x - 8,
-          top: mousePosition.y - 8,
-          boxShadow: '0 0 10px rgba(255, 0, 0, 0.5)'
-        }}
-      />
-      
-      {/* Debug: Position text */}
-      <div className="fixed top-4 right-4 bg-black/80 text-white p-2 rounded text-xs font-mono z-[9999] pointer-events-none">
-        <div>Mouse: {Math.round(mousePosition.x)}, {Math.round(mousePosition.y)}</div>
-        <div>Active: {isMouseActive ? 'YES' : 'NO'}</div>
-        <div>Mobile: {isMobile ? 'YES' : 'NO'}</div>
-        <div>Mode: {(isMobile || !isMouseActive) ? 'WAVE' : 'CURSOR'}</div>
-      </div>
 
     </div>
   );
