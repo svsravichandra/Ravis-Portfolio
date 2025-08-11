@@ -95,17 +95,19 @@ export default function HeroSection() {
               </div>
 
               <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-                <Button 
+                <Button
                   className="bg-primary text-dark px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-semibold hover:bg-opacity-90 transition-all duration-300 btn-glow"
                   onClick={() => setIsVoiceModalOpen(true)}
-                >Let's Talk</Button>
+                >
+                  Let's Talk
+                </Button>
                 <Button
                   variant="outline"
                   className="glass px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-semibold hover:bg-opacity-20 transition-all duration-300"
                   onClick={() => {
-                    const chatSection = document.getElementById('chatbot');
+                    const chatSection = document.getElementById("chatbot");
                     if (chatSection) {
-                      chatSection.scrollIntoView({ behavior: 'smooth' });
+                      chatSection.scrollIntoView({ behavior: "smooth" });
                     }
                   }}
                 >
@@ -114,15 +116,18 @@ export default function HeroSection() {
               </div>
 
               {/* Mobile bottom spacing - 3 line heights only on mobile */}
-              <div className="block sm:hidden h-[3.6rem]" aria-hidden="true"></div>
+              <div
+                className="block sm:hidden h-[10.6rem]"
+                aria-hidden="true"
+              ></div>
             </motion.div>
           </div>
         </div>
       </section>
       {/* Voice Agent Modal */}
-      <VoiceAgentModal 
-        isOpen={isVoiceModalOpen} 
-        onClose={() => setIsVoiceModalOpen(false)} 
+      <VoiceAgentModal
+        isOpen={isVoiceModalOpen}
+        onClose={() => setIsVoiceModalOpen(false)}
       />
     </>
   );
