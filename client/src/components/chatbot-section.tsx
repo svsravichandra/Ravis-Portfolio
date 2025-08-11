@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import VoiceAgentModal from "./voice-agent-modal";
 
 interface Message {
   id: string;
@@ -23,6 +24,7 @@ export default function ChatbotSection() {
     }
   ]);
   const [inputValue, setInputValue] = useState("");
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const { toast } = useToast();
 
   const sendMessageMutation = useMutation({
@@ -114,8 +116,12 @@ export default function ChatbotSection() {
                   </p>
                 </div>
               </div>
-              <div className="text-gray-400">
-                <i className="fas fa-cog"></i>
+              <div 
+                className="text-gray-400 hover:text-primary cursor-pointer transition-colors duration-300"
+                onClick={() => setIsVoiceModalOpen(true)}
+                title="Start voice conversation"
+              >
+                <i className="fas fa-phone"></i>
               </div>
             </div>
 
@@ -201,6 +207,12 @@ export default function ChatbotSection() {
           
         </motion.div>
       </div>
+      
+      {/* Voice Agent Modal */}
+      <VoiceAgentModal 
+        isOpen={isVoiceModalOpen} 
+        onClose={() => setIsVoiceModalOpen(false)} 
+      />
     </section>
   );
 }
