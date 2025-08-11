@@ -45,7 +45,7 @@ export default function CoreStrengths() {
           </p>
 
           {/* Motivational Quote */}
-          <div className="glass rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 border-l-4 border-secondary max-w-3xl">
+          <div className="glass rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 border-l-4 border-secondary max-w-3xl ml-[128px] mr-[128px]">
             <blockquote className="text-sm sm:text-base lg:text-lg italic text-gray-300">
               "Excellence is not a skill, it's an attitude."
             </blockquote>
