@@ -17,6 +17,8 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
   const [conversation, setConversation] = useState<any>(null);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
   const [isReconnecting, setIsReconnecting] = useState(false);
+  const [isManuallyClosing, setIsManuallyClosing] = useState(false);
+  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const maxReconnectAttempts = 3;
   const reconnectDelayMs = 2000;
 
@@ -50,7 +52,8 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
 
       // Request microphone permission first (only if not reconnecting)
       if (!isReconnect) {
-        await navigator.mediaDevices.getUserMedia({ audio: true });
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        setMediaStream(stream);
       }
 
       const conv = await Conversation.startSession({
@@ -69,13 +72,13 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
           setConversationStatus('disconnected');
           setAgentMode('idle');
           
-          // Attempt reconnection if modal is still open and we haven't exceeded max attempts
-          if (isOpen && reconnectAttempts < maxReconnectAttempts) {
+          // Only attempt reconnection if modal is still open, we haven't exceeded max attempts, and it's not a manual close
+          if (isOpen && !isManuallyClosing && reconnectAttempts < maxReconnectAttempts) {
             console.log(`Attempting reconnection ${reconnectAttempts + 1}/${maxReconnectAttempts}`);
             setReconnectAttempts(prev => prev + 1);
             setError(`Connection lost. Reconnecting... (${reconnectAttempts + 1}/${maxReconnectAttempts})`);
             setTimeout(() => startConversation(true), 1000);
-          } else if (reconnectAttempts >= maxReconnectAttempts) {
+          } else if (reconnectAttempts >= maxReconnectAttempts && !isManuallyClosing) {
             setError("Connection failed after multiple attempts. Please try restarting the voice agent.");
             setIsReconnecting(false);
           }
@@ -123,19 +126,31 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
     if (conversation) {
       try {
         console.log('Ending conversation session...');
+        setIsManuallyClosing(true);
         await conversation.endSession();
       } catch (error) {
         console.error('Error ending conversation:', error);
-        // Force cleanup even if endSession fails
-      } finally {
-        setConversation(null);
-        setConversationStatus('disconnected');
-        setAgentMode('idle');
-        setReconnectAttempts(0);
-        setIsReconnecting(false);
-        setError("");
+        // Continue cleanup even if endSession fails
       }
     }
+    
+    // Stop microphone tracks
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => {
+        track.stop();
+        console.log('Stopped microphone track:', track.label);
+      });
+      setMediaStream(null);
+    }
+    
+    // Reset all states
+    setConversation(null);
+    setConversationStatus('disconnected');
+    setAgentMode('idle');
+    setReconnectAttempts(0);
+    setIsReconnecting(false);
+    setIsManuallyClosing(false);
+    setError("");
   };
 
   const handleClose = () => {
