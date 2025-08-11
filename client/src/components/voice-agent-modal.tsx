@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // Import ElevenLabs Conversation API
 import { Conversation } from "@elevenlabs/client";
@@ -17,28 +17,45 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
   const [conversation, setConversation] = useState<any>(null);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
   const [isReconnecting, setIsReconnecting] = useState(false);
-  const [isManuallyClosing, setIsManuallyClosing] = useState(false);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
+  const [shouldReconnect, setShouldReconnect] = useState(true);
+  const isOpenRef = useRef(isOpen);
+  const conversationRef = useRef<any>(null);
   const maxReconnectAttempts = 3;
   const reconnectDelayMs = 2000;
+
+  // Keep refs in sync
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
+
+  useEffect(() => {
+    conversationRef.current = conversation;
+  }, [conversation]);
 
   // Your personalized agent ID
   const AGENT_ID = "agent_7301k2756861f0zs3jmmf1c6t96s";
 
-  // Start conversation when modal opens
+  // Start conversation when modal opens, cleanup when it closes
   useEffect(() => {
     if (isOpen && !conversation) {
+      (window as any).voiceModalOpen = true;
+      setShouldReconnect(true);
       startConversation();
     } else if (!isOpen && conversation) {
+      (window as any).voiceModalOpen = false;
+      setShouldReconnect(false);
       endConversation();
     }
-
+    
     return () => {
-      if (conversation) {
+      (window as any).voiceModalOpen = false;
+      setShouldReconnect(false);
+      if (conversationRef.current) {
         endConversation();
       }
     };
-  }, [isOpen, conversation]);
+  }, [isOpen]);
 
   const startConversation = async (isReconnect = false) => {
     try {
@@ -72,16 +89,30 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
           setConversationStatus('disconnected');
           setAgentMode('idle');
           
-          // Only attempt reconnection if modal is still open, we haven't exceeded max attempts, and it's not a manual close
-          if (isOpen && !isManuallyClosing && reconnectAttempts < maxReconnectAttempts) {
-            console.log(`Attempting reconnection ${reconnectAttempts + 1}/${maxReconnectAttempts}`);
-            setReconnectAttempts(prev => prev + 1);
-            setError(`Connection lost. Reconnecting... (${reconnectAttempts + 1}/${maxReconnectAttempts})`);
-            setTimeout(() => startConversation(true), 1000);
-          } else if (reconnectAttempts >= maxReconnectAttempts && !isManuallyClosing) {
-            setError("Connection failed after multiple attempts. Please try restarting the voice agent.");
-            setIsReconnecting(false);
-          }
+          // Use setTimeout to avoid closure issues
+          setTimeout(() => {
+            // Check if modal is still open using global window state
+            if (!(window as any).voiceModalOpen) {
+              console.log('Modal closed - not reconnecting');
+              return;
+            }
+            
+            // Only attempt reconnection if modal is still open and we haven't exceeded max attempts
+            setReconnectAttempts(prev => {
+              const newAttempts = prev + 1;
+              if (newAttempts <= maxReconnectAttempts && (window as any).voiceModalOpen) {
+                console.log(`Attempting reconnection ${newAttempts}/${maxReconnectAttempts}`);
+                setError(`Connection lost. Reconnecting... (${newAttempts}/${maxReconnectAttempts})`);
+                startConversation(true);
+                return newAttempts;
+              } else if (newAttempts > maxReconnectAttempts) {
+                setError("Connection failed after multiple attempts. Please try restarting the voice agent.");
+                setIsReconnecting(false);
+                return newAttempts;
+              }
+              return prev;
+            });
+          }, 100);
         },
         onModeChange: ({ mode }: { mode: string }) => {
           console.log('Agent mode changed to:', mode);
@@ -123,14 +154,16 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
   };
 
   const endConversation = async () => {
+    console.log('Ending conversation session...');
+    
+    // Disable reconnection first
+    setShouldReconnect(false);
+    
     if (conversation) {
       try {
-        console.log('Ending conversation session...');
-        setIsManuallyClosing(true);
         await conversation.endSession();
       } catch (error) {
         console.error('Error ending conversation:', error);
-        // Continue cleanup even if endSession fails
       }
     }
     
@@ -149,7 +182,6 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
     setAgentMode('idle');
     setReconnectAttempts(0);
     setIsReconnecting(false);
-    setIsManuallyClosing(false);
     setError("");
   };
 
@@ -183,7 +215,7 @@ export default function VoiceAgentModal({ isOpen, onClose }: VoiceAgentModalProp
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none"
           >
-            <div className="bg-gray-900 rounded-3xl p-12 max-w-2xl w-full mx-4 pointer-events-auto relative">
+            <div className="bg-gray-900 rounded-3xl p-12 max-w-2xl w-full mx-4 pointer-events-auto relative" data-voice-modal="true">
               {/* Orb Container */}
               <div className="flex flex-col items-center space-y-8">
                 {/* Animated Orb */}
