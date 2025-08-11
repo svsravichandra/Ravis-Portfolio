@@ -32,7 +32,7 @@ export default function SkillSection({
   const gridCols = reverse ? "lg:grid-cols-4" : "lg:grid-cols-3";
 
   return (
-    <section id={id} className="min-h-screen flex items-center justify-center px-6 lg:px-12 section-snap">
+    <section id={id} className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-12 py-20 sm:py-16 lg:py-0 section-snap">
       <div className="max-w-7xl mx-auto w-full">
         <div className={`grid ${gridCols} gap-12 items-center`}>
           <motion.div 
@@ -43,7 +43,7 @@ export default function SkillSection({
             transition={{ duration: 0.8 }}
           >
             <div>
-              <h2 className="font-space text-3xl lg:text-5xl font-bold mb-4">
+              <h2 className="font-space text-2xl sm:text-3xl lg:text-5xl font-bold mb-4">
                 {title.includes("span") ? (
                   <span dangerouslySetInnerHTML={{ __html: title }} />
                 ) : (
@@ -52,32 +52,32 @@ export default function SkillSection({
                   </>
                 )}
               </h2>
-              <p className="text-xl text-secondary font-medium italic mb-8">
+              <p className="text-base sm:text-lg lg:text-xl text-secondary font-medium italic mb-6 sm:mb-8">
                 {tagline}
               </p>
             </div>
 
-            <div className="glass rounded-3xl p-8">
-              <p className="text-lg text-gray-300 leading-relaxed">
+            <div className="glass rounded-2xl sm:rounded-3xl p-5 sm:p-6 lg:p-8">
+              <p className="text-sm sm:text-base lg:text-lg text-gray-300 leading-relaxed">
                 {description}
               </p>
             </div>
 
             {/* Tech Stack */}
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-2 sm:gap-3 lg:gap-4">
               {techStack.map((tech, index) => (
-                <span key={index} className="glass px-4 py-2 rounded-full text-sm font-medium">
+                <span key={index} className="glass px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium">
                   {tech}
                 </span>
               ))}
             </div>
 
             {/* Quote */}
-            <div className="glass rounded-2xl p-6 border-l-4 border-primary">
-              <blockquote className="text-lg italic text-gray-300">
+            <div className="glass rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 border-l-4 border-primary">
+              <blockquote className="text-sm sm:text-base lg:text-lg italic text-gray-300">
                 "{quote}"
               </blockquote>
-              <cite className="text-primary font-semibold mt-2 block">– {author}</cite>
+              <cite className="text-primary font-semibold mt-2 block text-sm sm:text-base">– {author}</cite>
             </div>
           </motion.div>
 

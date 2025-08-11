@@ -69,22 +69,22 @@ export default function ChatbotSection() {
   ];
 
   return (
-    <section id="chatbot" className="min-h-screen flex items-center justify-center px-6 lg:px-12 section-snap">
+    <section id="chatbot" className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-12 py-20 sm:py-16 lg:py-0 section-snap">
       <div className="max-w-7xl mx-auto w-full">
         <motion.div 
-          className="text-center mb-12"
+          className="text-center mb-8 sm:mb-10 lg:mb-12"
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <h2 className="font-space text-3xl lg:text-5xl font-bold mb-6">
+          <h2 className="font-space text-2xl sm:text-3xl lg:text-5xl font-bold mb-4 sm:mb-6">
             Meet <span className="text-primary">Ravi- Virtual Me</span>
           </h2>
-          <p className="text-xl text-secondary font-medium italic mb-8">
+          <p className="text-base sm:text-lg lg:text-xl text-secondary font-medium italic mb-6 sm:mb-8">
             Where conversation meets innovation.
           </p>
-          <p className="text-lg text-gray-300 max-w-3xl mx-auto">
+          <p className="text-sm sm:text-base lg:text-lg text-gray-300 max-w-3xl mx-auto px-4 sm:px-0">
             Meet Ravi- Virtual Me—your AI-powered interactive guide. This agentic chatbot answers questions, 
             shares insights, and demonstrates how user experience is elevated by real-time, conversational AI. 
             It's a living showcase of my technical and UX vision.
@@ -99,9 +99,9 @@ export default function ChatbotSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          <div className="glass-strong rounded-3xl p-8">
+          <div className="glass-strong rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8">
             {/* Chat Header */}
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-600">
+            <div className="flex items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-gray-600">
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
                   <i className="fas fa-robot text-dark"></i>

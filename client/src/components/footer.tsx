@@ -8,7 +8,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="py-12 px-6 lg:px-12 border-t border-gray-800">
+    <footer className="py-8 sm:py-10 lg:py-12 px-4 sm:px-6 lg:px-12 border-t border-gray-800">
       <motion.div 
         className="max-w-7xl mx-auto"
         initial={{ opacity: 0, y: 20 }}
@@ -16,14 +16,14 @@ export default function Footer() {
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <div className="flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
+        <div className="flex flex-col md:flex-row justify-between items-center space-y-4 sm:space-y-6 md:space-y-0">
           <div className="text-center md:text-left">
-            <p className="text-gray-400">
+            <p className="text-sm sm:text-base text-gray-400">
               Designed and coded with vision by <span className="text-primary font-semibold">Satya Ravi</span>
             </p>
           </div>
           
-          <div className="flex space-x-6">
+          <div className="flex space-x-4 sm:space-x-6">
             {socialLinks.map((link, index) => (
               <motion.a
                 key={index}
@@ -35,7 +35,7 @@ export default function Footer() {
                 whileTap={{ scale: 0.9 }}
                 aria-label={link.label}
               >
-                <i className={`${link.icon} text-2xl`}></i>
+                <i className={`${link.icon} text-xl sm:text-2xl`}></i>
               </motion.a>
             ))}
           </div>

@@ -10,7 +10,7 @@ export default function HeroSection() {
     <>
     <section
       id="hero"
-      className="min-h-screen flex items-center justify-center px-6 lg:px-12 section-snap"
+      className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-12 pt-20 sm:pt-16 lg:pt-0 section-snap"
     >
       <div className="max-w-7xl mx-auto w-full">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -24,7 +24,7 @@ export default function HeroSection() {
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             <div className="relative">
-              <div className="w-80 h-80 lg:w-96 lg:h-96">
+              <div className="w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96">
                 <img
                   src={portraitImage}
                   alt="Satya Ravi - Professional Portrait"
@@ -42,13 +42,13 @@ export default function HeroSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="font-space text-4xl lg:text-6xl xl:text-7xl font-bold leading-tight">
+            <h1 className="font-space text-3xl sm:text-4xl lg:text-6xl xl:text-7xl font-bold leading-tight">
               Hey,
               <br />
               I'm <span className="text-primary">Satya Ravi</span>
             </h1>
             <div className="space-y-2">
-              <h2 className="font-space text-2xl lg:text-3xl xl:text-4xl font-light text-gray-300 relative">
+              <h2 className="font-space text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-light text-gray-300 relative">
                 <span className="relative italic">
                   I'm just a Developer.
                   <svg
@@ -70,13 +70,13 @@ export default function HeroSection() {
                 </span>
               </h2>
               <div
-                className="handwritten-text text-2xl lg:text-3xl xl:text-4xl"
+                className="handwritten-text text-xl sm:text-2xl lg:text-3xl xl:text-4xl"
                 style={{ color: "rgb(239 68 68)" }}
               >
                 I Craft Innovations
               </div>
             </div>
-            <p className="text-xl lg:text-2xl text-gray-400 leading-relaxed max-w-2xl">
+            <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-gray-400 leading-relaxed max-w-2xl">
               Building intelligent applications with{" "}
               <span className="text-primary font-semibold">scale</span>,
               <span className="text-primary font-semibold"> creativity</span>,
@@ -85,25 +85,25 @@ export default function HeroSection() {
             </p>
 
             {/* Motivational Quote */}
-            <div className="glass rounded-2xl p-6 border-l-4 border-primary max-w-2xl">
-              <blockquote className="text-lg italic text-gray-300">
+            <div className="glass rounded-2xl p-4 sm:p-6 border-l-4 border-primary max-w-2xl">
+              <blockquote className="text-sm sm:text-base lg:text-lg italic text-gray-300">
                 "The best way to predict the future is to invent it."
               </blockquote>
-              <cite className="text-primary font-semibold mt-2 block">
+              <cite className="text-primary font-semibold mt-2 block text-sm sm:text-base">
                 – Alan Kay
               </cite>
             </div>
 
-            <div className="flex space-x-4">
+            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
               <Button 
-                className="bg-primary text-dark px-8 py-4 rounded-xl font-semibold hover:bg-opacity-90 transition-all duration-300 btn-glow"
+                className="bg-primary text-dark px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-semibold hover:bg-opacity-90 transition-all duration-300 btn-glow"
                 onClick={() => setIsVoiceModalOpen(true)}
               >
                 Let's Connect
               </Button>
               <Button
                 variant="outline"
-                className="glass px-8 py-4 rounded-xl font-semibold hover:bg-opacity-20 transition-all duration-300"
+                className="glass px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-semibold hover:bg-opacity-20 transition-all duration-300"
                 onClick={() => {
                   const chatSection = document.getElementById('chatbot');
                   if (chatSection) {
