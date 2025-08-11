@@ -9,31 +9,39 @@ export default function HexagonalBackground() {
   const [isMouseActive, setIsMouseActive] = useState(false);
 
   useEffect(() => {
-    // Detect mobile/touch devices
+    // Better mobile detection - only consider it mobile if there's NO mouse events
     const checkMobile = () => {
-      const touchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      const smallScreen = window.innerWidth <= 768;
-      setIsMobile(touchDevice || smallScreen);
+      // Only check screen size, not touch capability (many laptops have touch screens)
+      const smallScreen = window.innerWidth <= 640; // Reduced threshold to 640px
+      setIsMobile(smallScreen);
     };
 
     checkMobile();
     window.addEventListener('resize', checkMobile);
 
     const handleMouseMove = (e: MouseEvent) => {
+      // Mouse movement detected - definitely not mobile-only device
+      setIsMobile(false);
       setMousePosition({
         x: e.clientX,
         y: e.clientY
       });
-      if (!isMobile) {
-        setIsMouseActive(true);
-      }
+      setIsMouseActive(true);
+    };
+    
+    const handleTouchStart = () => {
+      // Touch event detected - likely mobile
+      setIsMobile(true);
+      setIsMouseActive(false);
     };
 
     // Listen to window mouse events instead of container
     window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchstart', handleTouchStart);
     
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('resize', checkMobile);
     };
   }, []);
