@@ -112,6 +112,9 @@ export default function HeroSection() {
                   Let's Chat
                 </Button>
               </div>
+
+              {/* Mobile bottom spacing - 3 line heights only on mobile */}
+              <div className="block sm:hidden h-[3.6rem]" aria-hidden="true"></div>
             </motion.div>
           </div>
         </div>
