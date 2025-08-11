@@ -45,7 +45,7 @@ export default function HeroSection() {
             <h1 className="font-space text-3xl sm:text-4xl lg:text-6xl xl:text-7xl font-bold leading-tight">
               Hey,
               <br />
-              I'm <span className="text-primary">Satya Ravi</span>
+              Am <span className="text-primary">Satya Ravi</span>
             </h1>
             <div className="space-y-2">
               <h2 className="font-space text-xl sm:text-2xl lg:text-3xl xl:text-4xl font-light text-gray-300 relative">
