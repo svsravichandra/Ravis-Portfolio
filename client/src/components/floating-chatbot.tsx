@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import portraitImage from "@assets/ChatGPT Image Aug 8, 2025, 04_52_14 AM_1754660498096.png";
+import VoiceAgentModal from "./voice-agent-modal";
 
 interface Message {
   id: string;
@@ -13,6 +14,7 @@ interface Message {
 
 export default function FloatingChatbot() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -123,12 +125,21 @@ export default function FloatingChatbot() {
                 </div>
                 <span className="text-primary font-mono text-sm">ravi@portfolio:~$</span>
               </div>
-              <button 
-                onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <i className="fas fa-times"></i>
-              </button>
+              <div className="flex items-center space-x-3">
+                <button 
+                  onClick={() => setIsVoiceModalOpen(true)}
+                  className="text-gray-400 hover:text-primary transition-colors"
+                  title="Start voice conversation"
+                >
+                  <i className="fas fa-phone"></i>
+                </button>
+                <button 
+                  onClick={() => setIsOpen(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
             </div>
 
             {/* Messages */}
@@ -206,6 +217,12 @@ export default function FloatingChatbot() {
           </motion.div>
         )}
       </AnimatePresence>
+      
+      {/* Voice Agent Modal */}
+      <VoiceAgentModal 
+        isOpen={isVoiceModalOpen} 
+        onClose={() => setIsVoiceModalOpen(false)} 
+      />
     </>
   );
 }
