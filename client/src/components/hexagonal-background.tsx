@@ -3,19 +3,78 @@ import { useEffect, useRef, useState, useMemo } from "react";
 export default function HexagonalBackground() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isMobile, setIsMobile] = useState(false);
+  const [waveCenter, setWaveCenter] = useState({ x: 0, y: 0 });
+  const [waveTime, setWaveTime] = useState(0);
+  const [lastMouseMove, setLastMouseMove] = useState(Date.now());
 
   useEffect(() => {
+    // Detect mobile/touch devices
+    const checkMobile = () => {
+      const touchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const smallScreen = window.innerWidth <= 768;
+      setIsMobile(touchDevice || smallScreen);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({
         x: e.clientX,
         y: e.clientY
       });
+      setLastMouseMove(Date.now());
     };
 
     // Listen to window mouse events instead of container
     window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('resize', checkMobile);
+    };
   }, []);
+
+  // Auto-animation for mobile/no-cursor scenarios
+  useEffect(() => {
+    let animationFrame: number;
+    
+    const animate = () => {
+      const now = Date.now();
+      const timeSinceMouseMove = now - lastMouseMove;
+      
+      // Start auto-animation if no mouse movement for 2 seconds or on mobile
+      if (isMobile || timeSinceMouseMove > 2000) {
+        setWaveTime(prev => prev + 0.02);
+        
+        // Change wave direction every 4 seconds
+        const cycle = Math.floor(waveTime / 4);
+        const directions = [
+          { x: 0, y: 0 }, // top-left
+          { x: window.innerWidth, y: 0 }, // top-right
+          { x: window.innerWidth, y: window.innerHeight }, // bottom-right
+          { x: 0, y: window.innerHeight }, // bottom-left
+          { x: window.innerWidth / 2, y: 0 }, // top-center
+          { x: window.innerWidth / 2, y: window.innerHeight }, // bottom-center
+        ];
+        
+        const currentDirection = directions[cycle % directions.length];
+        const progress = (waveTime % 4) / 4;
+        
+        // Create wave effect moving across screen
+        setWaveCenter({
+          x: currentDirection.x + (window.innerWidth / 2 - currentDirection.x) * Math.sin(progress * Math.PI),
+          y: currentDirection.y + (window.innerHeight / 2 - currentDirection.y) * Math.sin(progress * Math.PI)
+        });
+      }
+      
+      animationFrame = requestAnimationFrame(animate);
+    };
+    
+    animationFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrame);
+  }, [isMobile, lastMouseMove, waveTime]);
 
   // Skills data with icons
   const skills = [
@@ -89,10 +148,22 @@ export default function HexagonalBackground() {
     return hexagons;
   }, []);
 
-  const getDistanceFromMouse = (hexX: number, hexY: number) => {
-    const dx = mousePosition.x - hexX;
-    const dy = mousePosition.y - hexY;
-    return Math.sqrt(dx * dx + dy * dy);
+  const getDistanceFromInteractionPoint = (hexX: number, hexY: number) => {
+    const now = Date.now();
+    const timeSinceMouseMove = now - lastMouseMove;
+    const useWaveAnimation = isMobile || timeSinceMouseMove > 2000;
+    
+    if (useWaveAnimation) {
+      // Use wave center for auto-animation
+      const dx = waveCenter.x - hexX;
+      const dy = waveCenter.y - hexY;
+      return Math.sqrt(dx * dx + dy * dy);
+    } else {
+      // Use mouse position for cursor interaction
+      const dx = mousePosition.x - hexX;
+      const dy = mousePosition.y - hexY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
   };
 
   return (
@@ -140,8 +211,8 @@ export default function HexagonalBackground() {
         </defs>
 
         {hexagons.map((hex) => {
-          const distance = getDistanceFromMouse(hex.x, hex.y);
-          const maxDistance = 120;
+          const distance = getDistanceFromInteractionPoint(hex.x, hex.y);
+          const maxDistance = isMobile ? 200 : 120; // Larger radius for mobile wave effect
           const isActive = distance < maxDistance;
           const intensity = isActive ? Math.max(0, 1 - distance / maxDistance) : 0;
           
@@ -220,7 +291,11 @@ export default function HexagonalBackground() {
       <div 
         className="absolute inset-0 bg-black/2 pointer-events-none"
         style={{
-          background: `radial-gradient(400px circle at ${mousePosition.x}px ${mousePosition.y}px, 
+          background: `radial-gradient(400px circle at ${
+            (isMobile || Date.now() - lastMouseMove > 2000) ? waveCenter.x : mousePosition.x
+          }px ${
+            (isMobile || Date.now() - lastMouseMove > 2000) ? waveCenter.y : mousePosition.y
+          }px, 
             rgba(0, 255, 150, 0.008) 0%, 
             rgba(0, 0, 0, 0.02) 40%, 
             rgba(0, 0, 0, 0.05) 100%)`
