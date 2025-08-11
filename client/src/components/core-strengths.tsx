@@ -27,53 +27,53 @@ export default function CoreStrengths() {
   return (
     <section
       id="strengths"
-      className="min-h-screen flex items-center justify-center px-6 lg:px-12 section-snap"
+      className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-12 py-20 sm:py-16 lg:py-0 section-snap"
     >
-      <div className="max-w-7xl mx-auto w-full text-center">
+      <div className="max-w-7xl mx-auto w-full">
         <motion.div
-          className="mb-16"
+          className="mb-12 sm:mb-14 lg:mb-16 text-center sm:text-left"
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <h2 className="font-space text-3xl lg:text-5xl font-bold mb-6">
+          <h2 className="font-space text-2xl sm:text-3xl lg:text-5xl font-bold mb-4 sm:mb-6">
             Core <span className="text-primary">Competencies</span>
           </h2>
-          <p className="text-xl lg:text-2xl text-gray-400 mb-8 italic">
+          <p className="text-base sm:text-lg lg:text-xl xl:text-2xl text-gray-400 mb-6 sm:mb-8 italic">
             Excellence isn't just what I do – it's how I think.
           </p>
 
           {/* Motivational Quote */}
-          <div className="glass rounded-2xl p-6 border-l-4 border-secondary max-w-3xl mx-auto">
-            <blockquote className="text-lg italic text-gray-300">
+          <div className="glass rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 border-l-4 border-secondary max-w-3xl sm:mx-auto">
+            <blockquote className="text-sm sm:text-base lg:text-lg italic text-gray-300">
               "Excellence is not a skill, it's an attitude."
             </blockquote>
-            <cite className="text-secondary font-semibold mt-2 block">
+            <cite className="text-secondary font-semibold mt-2 block text-sm sm:text-base">
               – Ralph Marston
             </cite>
           </div>
         </motion.div>
 
         {/* Strength Tiles */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 max-w-4xl mx-auto">
           {strengthTiles.map((tile, index) => (
             <motion.div
               key={index}
-              className="glass-strong rounded-3xl p-8 tile-hover transition-all duration-500 cursor-pointer"
+              className="glass-strong rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 tile-hover transition-all duration-500 cursor-pointer"
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               whileHover={{ y: -5, rotate: 1 }}
             >
-              <div className="text-primary text-4xl mb-4">
+              <div className="text-primary text-2xl sm:text-3xl lg:text-4xl mb-3 sm:mb-4">
                 <i className={tile.icon}></i>
               </div>
-              <h3 className="font-space text-xl lg:text-2xl font-bold mb-3">
+              <h3 className="font-space text-base sm:text-lg lg:text-xl xl:text-2xl font-bold mb-2 sm:mb-3">
                 {tile.title}
               </h3>
-              <p className="text-gray-400">{tile.description}</p>
+              <p className="text-gray-400 text-sm sm:text-base">{tile.description}</p>
             </motion.div>
           ))}
         </div>

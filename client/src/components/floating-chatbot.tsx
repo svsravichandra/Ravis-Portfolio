@@ -69,7 +69,7 @@ export default function FloatingChatbot() {
     <>
       {/* Floating Avatar Button */}
       <motion.div
-        className="fixed bottom-8 right-8 z-50"
+        className="fixed bottom-8 right-4 sm:right-8 z-50"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ delay: 1, type: "spring" }}
@@ -107,7 +107,7 @@ export default function FloatingChatbot() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed bottom-28 right-8 w-96 h-[500px] glass-terminal rounded-2xl shadow-2xl z-50 overflow-hidden"
+            className="fixed bottom-28 right-2 sm:right-8 w-[calc(100vw-16px)] sm:w-96 max-w-96 h-[500px] max-h-[calc(100vh-140px)] glass-terminal rounded-2xl shadow-2xl z-50 overflow-hidden"
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -132,7 +132,7 @@ export default function FloatingChatbot() {
             </div>
 
             {/* Messages */}
-            <div className="h-[350px] overflow-y-auto p-4 space-y-3 font-mono text-sm">
+            <div className="h-[calc(100%-120px)] sm:h-[350px] overflow-y-auto p-3 sm:p-4 space-y-3 font-mono text-xs sm:text-sm">
               {messages.map((message) => (
                 <motion.div 
                   key={message.id}
@@ -182,16 +182,16 @@ export default function FloatingChatbot() {
             </div>
 
             {/* Input */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 glass-strong border-t border-gray-700">
+            <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 glass-strong border-t border-gray-700">
               <div className="flex items-center space-x-2">
-                <span className="text-blue-400 font-mono text-sm">user$</span>
+                <span className="text-blue-400 font-mono text-xs sm:text-sm">user$</span>
                 <input
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                   placeholder="_"
-                  className="flex-1 bg-transparent text-white font-mono text-sm focus:outline-none placeholder-gray-600"
+                  className="flex-1 bg-transparent text-white font-mono text-xs sm:text-sm focus:outline-none placeholder-gray-600"
                   disabled={sendMessageMutation.isPending}
                 />
                 <button
