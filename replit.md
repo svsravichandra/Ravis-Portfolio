@@ -25,6 +25,8 @@ Preferred communication style: Simple, everyday language.
 - **API Design**: RESTful endpoints for chat functionality and health checks
 - **Error Handling**: Centralized error middleware with structured error responses
 - **Development**: Hot module replacement and development server integration
+- **Deployment**: Enhanced startup error handling with comprehensive logging for production deployment (Jan 2025)
+- **Server Configuration**: Listens on PORT environment variable with 0.0.0.0 host binding for Replit deployment compatibility
 
 ### Data Storage Solutions
 - **Database**: PostgreSQL with Drizzle ORM for type-safe database operations
