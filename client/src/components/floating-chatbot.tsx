@@ -104,7 +104,6 @@ export default function FloatingChatbot() {
           <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 rounded-full border-2 border-dark animate-pulse" />
         </motion.button>
       </motion.div>
-
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
@@ -131,7 +130,7 @@ export default function FloatingChatbot() {
                   className="text-gray-400 hover:text-primary transition-colors"
                   title="Start voice conversation"
                 >
-                  <i className="fas fa-phone"></i>
+                  <i className="fas fa-phone mt-[1px] mb-[1px] ml-[19px] mr-[19px]"></i>
                 </button>
                 <button 
                   onClick={() => setIsOpen(false)}
@@ -217,7 +216,6 @@ export default function FloatingChatbot() {
           </motion.div>
         )}
       </AnimatePresence>
-      
       {/* Voice Agent Modal */}
       <VoiceAgentModal 
         isOpen={isVoiceModalOpen} 
