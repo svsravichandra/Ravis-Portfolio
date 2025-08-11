@@ -19,7 +19,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 sm:space-y-6 md:space-y-0">
           <div className="text-center md:text-left">
             <p className="text-sm sm:text-base text-gray-400">
-              Designed and coded with vision by <span className="text-primary font-semibold">Satya Ravi</span>
+              Designed and coded with vision by <span className="text-primary font-semibold">Venkata Satya Ravi , Sama</span>
             </p>
           </div>
           
