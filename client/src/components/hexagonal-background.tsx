@@ -193,37 +193,37 @@ export default function HexagonalBackground() {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     
-    // Define content safe zones (areas where content typically appears) - reduced by 30%
+    // Define content safe zones (areas where content typically appears) - reduced by 80%
     const contentZones = [
       // Hero section content area (center)
       { 
         x: viewportWidth / 2, 
         y: viewportHeight / 2,
-        radius: Math.min(viewportWidth, viewportHeight) * 0.245  // 0.35 * 0.7
+        radius: Math.min(viewportWidth, viewportHeight) * 0.049  // 0.245 * 0.2
       },
       // Navigation area (top)
       { 
         x: viewportWidth / 2, 
         y: 80,
-        radius: viewportWidth * 0.28  // 0.4 * 0.7
+        radius: viewportWidth * 0.056  // 0.28 * 0.2
       },
       // Bottom content area
       { 
         x: viewportWidth / 2, 
         y: viewportHeight - 100,
-        radius: viewportWidth * 0.21  // 0.3 * 0.7
+        radius: viewportWidth * 0.042  // 0.21 * 0.2
       },
       // Left sidebar area
       { 
         x: 100, 
         y: viewportHeight / 2,
-        radius: 140  // 200 * 0.7
+        radius: 28  // 140 * 0.2
       },
       // Right sidebar area
       { 
         x: viewportWidth - 100, 
         y: viewportHeight / 2,
-        radius: 140  // 200 * 0.7
+        radius: 28  // 140 * 0.2
       }
     ];
     
@@ -238,7 +238,7 @@ export default function HexagonalBackground() {
     }
     
     // Fade factor: 0 = fully faded (near content), 1 = full effect (far from content)
-    const fadeDistance = 105; // Distance over which the fade occurs - reduced by 30%
+    const fadeDistance = 21; // Distance over which the fade occurs - reduced by 80%
     const fadeFactor = Math.min(1, minDistance / fadeDistance);
     
     // Apply easing to make the transition smoother
