@@ -17,6 +17,34 @@ export default function HexagonalBackground() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  // Skills data with icons
+  const skills = [
+    { name: 'HTML5', icon: 'fab fa-html5', color: '#E34F26' },
+    { name: 'CSS3', icon: 'fab fa-css3-alt', color: '#1572B6' },
+    { name: 'JavaScript', icon: 'fab fa-js-square', color: '#F7DF1E' },
+    { name: 'React', icon: 'fab fa-react', color: '#61DAFB' },
+    { name: 'Node.js', icon: 'fab fa-node-js', color: '#339933' },
+    { name: 'Python', icon: 'fab fa-python', color: '#3776AB' },
+    { name: 'Git', icon: 'fab fa-git-alt', color: '#F05032' },
+    { name: 'Docker', icon: 'fab fa-docker', color: '#2496ED' },
+    { name: 'AWS', icon: 'fab fa-aws', color: '#FF9900' },
+    { name: 'TypeScript', icon: 'fas fa-code', color: '#3178C6' },
+    { name: 'Vue.js', icon: 'fab fa-vuejs', color: '#4FC08D' },
+    { name: 'Angular', icon: 'fab fa-angular', color: '#DD0031' },
+    { name: 'Sass', icon: 'fab fa-sass', color: '#CC6699' },
+    { name: 'Bootstrap', icon: 'fab fa-bootstrap', color: '#7952B3' },
+    { name: 'WordPress', icon: 'fab fa-wordpress', color: '#21759B' },
+    { name: 'GitHub', icon: 'fab fa-github', color: '#181717' },
+    { name: 'NPM', icon: 'fab fa-npm', color: '#CB3837' },
+    { name: 'Linux', icon: 'fab fa-linux', color: '#FCC624' },
+    { name: 'Database', icon: 'fas fa-database', color: '#336791' },
+    { name: 'API', icon: 'fas fa-plug', color: '#FF6B6B' },
+    { name: 'Mobile', icon: 'fas fa-mobile-alt', color: '#4ECDC4' },
+    { name: 'Cloud', icon: 'fas fa-cloud', color: '#45B7D1' },
+    { name: 'AI/ML', icon: 'fas fa-brain', color: '#9B59B6' },
+    { name: 'Analytics', icon: 'fas fa-chart-line', color: '#E67E22' }
+  ];
+
   // Generate hexagonal pattern - memoized for performance
   const hexagons = useMemo(() => {
     const hexSize = 40;
@@ -45,11 +73,16 @@ export default function HexagonalBackground() {
         const x = col * horizontalSpacing;
         const y = row * verticalSpacing + (col % 2 === 1 ? verticalSpacing / 2 : 0);
         
+        // Assign a skill to each hexagon (cycling through the list)
+        const skillIndex = (row * cols + col) % skills.length;
+        const skill = skills[skillIndex];
+        
         hexagons.push({
           id: `hex-${row}-${col}`,
           x,
           y,
-          points: getHexagonPoints(x, y, hexSize)
+          points: getHexagonPoints(x, y, hexSize),
+          skill
         });
       }
     }
@@ -117,38 +150,53 @@ export default function HexagonalBackground() {
               {/* Base hexagon */}
               <polygon
                 points={hex.points}
-                fill="none"
+                fill={isActive ? `${hex.skill.color}20` : "rgba(255, 255, 255, 0.02)"}
                 stroke={isActive ? "url(#neonGradientActive)" : "url(#neonGradient)"}
                 strokeWidth={isActive ? 1.5 : 0.5}
-                opacity={isActive ? 0.3 + intensity * 0.7 : 0.15}
+                opacity={isActive ? 0.6 + intensity * 0.4 : 0.25}
                 filter={isActive ? "url(#hexGlowActive)" : "url(#hexGlow)"}
                 className="transition-all duration-300 ease-out"
                 style={{
-                  transform: isActive ? `scale(${1 + intensity * 0.05})` : 'scale(1)',
+                  transform: isActive ? `scale(${1 + intensity * 0.08})` : 'scale(1)',
                   transformOrigin: `${hex.x}px ${hex.y}px`
                 }}
               />
               
-              {/* Inner glow effect for active hexagons */}
-              {isActive && intensity > 0.3 && (
-                <polygon
-                  points={hex.points}
-                  fill={`rgba(59, 130, 246, ${intensity * 0.1})`}
-                  stroke="none"
-                  opacity={intensity * 0.5}
-                  className="transition-all duration-200 ease-out"
-                />
-              )}
+              {/* Skill icon using foreignObject */}
+              <foreignObject
+                x={hex.x - 12}
+                y={hex.y - 12}
+                width="24"
+                height="24"
+                className="pointer-events-none"
+                style={{
+                  transform: isActive ? `scale(${1 + intensity * 0.2})` : 'scale(1)',
+                  transformOrigin: 'center',
+                }}
+              >
+                <div className="w-full h-full flex items-center justify-center">
+                  <i 
+                    className={`${hex.skill.icon} text-lg transition-all duration-300`}
+                    style={{
+                      color: isActive ? hex.skill.color : `${hex.skill.color}80`,
+                      filter: isActive ? `drop-shadow(0 0 ${intensity * 8}px ${hex.skill.color})` : 'none',
+                      opacity: isActive ? 0.8 + intensity * 0.2 : 0.4
+                    }}
+                  />
+                </div>
+              </foreignObject>
               
-              {/* Center dot for highly active hexagons */}
-              {isActive && intensity > 0.6 && (
+              {/* Enhanced glow ring for active hexagons */}
+              {isActive && intensity > 0.4 && (
                 <circle
                   cx={hex.x}
                   cy={hex.y}
-                  r={2}
-                  fill="rgba(34, 197, 94, 0.8)"
+                  r={30}
+                  fill="none"
+                  stroke={hex.skill.color}
+                  strokeWidth={1}
+                  opacity={intensity * 0.3}
                   filter="url(#hexGlow)"
-                  opacity={intensity}
                   className="transition-all duration-200 ease-out"
                 />
               )}
@@ -168,15 +216,7 @@ export default function HexagonalBackground() {
         }}
       />
       
-      {/* Debug cursor position indicator */}
-      <div 
-        className="fixed w-6 h-6 rounded-full bg-cyan-500/30 border-2 border-cyan-400 pointer-events-none z-50"
-        style={{
-          left: mousePosition.x - 12,
-          top: mousePosition.y - 12,
-          boxShadow: '0 0 20px rgba(0, 255, 255, 0.5)'
-        }}
-      />
+
     </div>
   );
 }
