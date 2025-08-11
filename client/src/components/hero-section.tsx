@@ -94,7 +94,7 @@ export default function HeroSection() {
                 </cite>
               </div>
 
-              <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 mb-8 sm:mb-0">
+              <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
                 <Button 
                   className="bg-primary text-dark px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-semibold hover:bg-opacity-90 transition-all duration-300 btn-glow"
                   onClick={() => setIsVoiceModalOpen(true)}
