@@ -31,7 +31,7 @@ export default function CoreStrengths() {
     >
       <div className="max-w-7xl mx-auto w-full">
         <motion.div
-          className="mb-12 sm:mb-14 lg:mb-16 text-center sm:text-left"
+          className="mb-12 sm:mb-14 lg:mb-16 sm:text-left text-center"
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
