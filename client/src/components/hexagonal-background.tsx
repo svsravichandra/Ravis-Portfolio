@@ -187,64 +187,6 @@ export default function HexagonalBackground() {
     }
   };
 
-  // Calculate proximity fade factor based on distance to content elements
-  const getProximityFadeFactor = (hexX: number, hexY: number) => {
-    // Get viewport dimensions
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    
-    // Define content safe zones (areas where content typically appears) - reduced by 80%
-    const contentZones = [
-      // Hero section content area (center)
-      { 
-        x: viewportWidth / 2, 
-        y: viewportHeight / 2,
-        radius: Math.min(viewportWidth, viewportHeight) * 0.049  // 0.245 * 0.2
-      },
-      // Navigation area (top)
-      { 
-        x: viewportWidth / 2, 
-        y: 80,
-        radius: viewportWidth * 0.056  // 0.28 * 0.2
-      },
-      // Bottom content area
-      { 
-        x: viewportWidth / 2, 
-        y: viewportHeight - 100,
-        radius: viewportWidth * 0.042  // 0.21 * 0.2
-      },
-      // Left sidebar area
-      { 
-        x: 100, 
-        y: viewportHeight / 2,
-        radius: 28  // 140 * 0.2
-      },
-      // Right sidebar area
-      { 
-        x: viewportWidth - 100, 
-        y: viewportHeight / 2,
-        radius: 28  // 140 * 0.2
-      }
-    ];
-    
-    // Calculate minimum distance to any content zone
-    let minDistance = Infinity;
-    for (const zone of contentZones) {
-      const dx = hexX - zone.x;
-      const dy = hexY - zone.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      const normalizedDistance = Math.max(0, distance - zone.radius);
-      minDistance = Math.min(minDistance, normalizedDistance);
-    }
-    
-    // Fade factor: 0 = fully faded (near content), 1 = full effect (far from content)
-    const fadeDistance = 21; // Distance over which the fade occurs - reduced by 80%
-    const fadeFactor = Math.min(1, minDistance / fadeDistance);
-    
-    // Apply easing to make the transition smoother
-    return fadeFactor * fadeFactor; // Quadratic easing for smoother fade
-  };
-
   return (
     <div
       ref={containerRef}
@@ -294,30 +236,26 @@ export default function HexagonalBackground() {
           const useWave = isMobile || !isMouseActive;
           const maxDistance = useWave ? 200 : 120; // Larger radius for wave effect
           const isActive = distance < maxDistance;
-          const rawIntensity = isActive ? Math.max(0, 1 - distance / maxDistance) : 0;
-          
-          // Apply proximity fade to reduce intensity near content
-          const proximityFade = getProximityFadeFactor(hex.x, hex.y);
-          const intensity = rawIntensity * proximityFade;
+          const intensity = isActive ? Math.max(0, 1 - distance / maxDistance) : 0;
           
           return (
             <g key={hex.id}>
-              {/* Base hexagon - subtle and professional with proximity fade */}
+              {/* Base hexagon - subtle and professional */}
               <polygon
                 points={hex.points}
-                fill={intensity > 0 ? `rgba(0, 255, 150, ${0.03 * intensity})` : "rgba(255, 255, 255, 0.008)"}
-                stroke={intensity > 0 ? `rgba(0, 255, 150, ${0.4 * intensity})` : "rgba(255, 255, 255, 0.06)"}
-                strokeWidth={intensity > 0 ? (0.3 + 0.7 * intensity) : 0.3}
-                opacity={intensity > 0 ? (0.3 + 0.5 * intensity) : 0.3}
-                filter={intensity > 0.3 ? "url(#hexGlowActive)" : "none"}
+                fill={isActive ? "rgba(0, 255, 150, 0.03)" : "rgba(255, 255, 255, 0.008)"}
+                stroke={isActive ? "rgba(0, 255, 150, 0.4)" : "rgba(255, 255, 255, 0.06)"}
+                strokeWidth={isActive ? 1 : 0.3}
+                opacity={isActive ? 0.8 : 0.3}
+                filter={isActive ? "url(#hexGlowActive)" : "none"}
                 className="transition-all duration-500 ease-out"
                 style={{
-                  transform: intensity > 0 ? `scale(${1 + intensity * 0.05})` : 'scale(1)',
+                  transform: isActive ? `scale(${1 + intensity * 0.05})` : 'scale(1)',
                   transformOrigin: `${hex.x}px ${hex.y}px`
                 }}
               />
               
-              {/* Skill icon - monochromatic, only visible on hover with proximity fade */}
+              {/* Skill icon - monochromatic, only visible on hover */}
               <foreignObject
                 x={hex.x - 10}
                 y={hex.y - 10}
@@ -325,9 +263,9 @@ export default function HexagonalBackground() {
                 height="20"
                 className="pointer-events-none"
                 style={{
-                  transform: intensity > 0 ? `scale(${0.8 + intensity * 0.35})` : 'scale(0.8)',
+                  transform: isActive ? `scale(${1 + intensity * 0.15})` : 'scale(0.8)',
                   transformOrigin: 'center',
-                  opacity: intensity * 0.8 // Reduced opacity for subtlety
+                  opacity: isActive ? intensity : 0
                 }}
               >
                 <div className="w-full h-full flex items-center justify-center">
@@ -342,15 +280,15 @@ export default function HexagonalBackground() {
                 </div>
               </foreignObject>
               
-              {/* Subtle skill name tooltip on high intensity hover (proximity aware) */}
-              {intensity > 0.5 && (
+              {/* Subtle skill name tooltip on high intensity hover */}
+              {isActive && intensity > 0.7 && (
                 <foreignObject
                   x={hex.x - 25}
                   y={hex.y + 20}
                   width="50"
                   height="16"
                   className="pointer-events-none"
-                  style={{ opacity: Math.max(0, (intensity - 0.5) * 2) }}
+                  style={{ opacity: (intensity - 0.7) * 3 }}
                 >
                   <div className="w-full flex justify-center">
                     <span 
@@ -371,18 +309,18 @@ export default function HexagonalBackground() {
         })}
       </svg>
 
-      {/* Subtle professional overlay with reduced intensity */}
+      {/* Subtle professional overlay */}
       <div 
         className="absolute inset-0 bg-black/2 pointer-events-none"
         style={{
-          background: `radial-gradient(300px circle at ${
+          background: `radial-gradient(400px circle at ${
             (isMobile || !isMouseActive) ? waveCenter.x : mousePosition.x
           }px ${
             (isMobile || !isMouseActive) ? waveCenter.y : mousePosition.y
           }px, 
-            rgba(0, 255, 150, 0.004) 0%, 
-            rgba(0, 0, 0, 0.01) 40%, 
-            rgba(0, 0, 0, 0.02) 100%)`
+            rgba(0, 255, 150, 0.008) 0%, 
+            rgba(0, 0, 0, 0.02) 40%, 
+            rgba(0, 0, 0, 0.05) 100%)`
         }}
       />
 

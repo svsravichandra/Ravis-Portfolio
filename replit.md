@@ -79,8 +79,6 @@ Preferred communication style: Simple, everyday language.
 - **Cursor Interaction**: Desktop devices track mouse position for hover effects with green neon glow
 - **Mobile Optimization**: Automatic wave animations flow across hexagons when no cursor is detected
 - **Smart Device Detection**: Fixed mobile detection logic to properly distinguish between desktop and mobile devices (Jan 2025)
-- **Proximity Fading**: Background effects automatically fade out near content elements to improve readability (Jan 2025)
-- **Content Zones**: Defined safe areas where hover effects reduce intensity to prevent visual dominance
 - **Performance**: Optimized rendering with conditional animation modes for smooth 60fps interactions
 
 ### Development Tools
