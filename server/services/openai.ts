@@ -1,12 +1,26 @@
 import OpenAI from "openai";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({
-  apiKey:
-    process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "",
-});
+let openai: OpenAI | null = null;
+
+// Initialize OpenAI client only if API key is available
+try {
+  const apiKey = process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "";
+  if (apiKey) {
+    openai = new OpenAI({ apiKey });
+    console.log("✓ OpenAI client initialized successfully");
+  } else {
+    console.log("⚠ OpenAI API key not found - chat functionality will be disabled");
+  }
+} catch (error) {
+  console.log("⚠ Failed to initialize OpenAI client:", error);
+}
 
 export async function generateChatResponse(message: string): Promise<string> {
+  if (!openai) {
+    throw new Error("AI chat functionality is currently unavailable. Please check if the OpenAI API key is configured.");
+  }
+
   try {
     const systemPrompt = `You are Ravi (Virtual Me), an AI that imposturing , pretending  Satya Ravi, a skilled developer specializing in:
 

@@ -1,9 +1,19 @@
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 
 // Initialize ElevenLabs client
-const elevenlabs = new ElevenLabsClient({
-  apiKey: process.env.ELEVENLABS_API_KEY,
-});
+let elevenlabs: ElevenLabsClient | null = null;
+
+try {
+  const apiKey = process.env.ELEVENLABS_API_KEY;
+  if (apiKey) {
+    elevenlabs = new ElevenLabsClient({ apiKey });
+    console.log("✓ ElevenLabs client initialized successfully");
+  } else {
+    console.log("⚠ ElevenLabs API key not found - speech functionality will be disabled");
+  }
+} catch (error) {
+  console.log("⚠ Failed to initialize ElevenLabs client:", error);
+}
 
 export interface VoiceConfig {
   voiceId: string;
@@ -24,6 +34,10 @@ export async function generateSpeech(
   text: string,
   voiceConfig: Partial<VoiceConfig> = {}
 ): Promise<Buffer> {
+  if (!elevenlabs) {
+    throw new Error("Speech generation functionality is currently unavailable. Please check if the ElevenLabs API key is configured.");
+  }
+
   try {
     const config = { ...DEFAULT_VOICE_CONFIG, ...voiceConfig };
     
@@ -69,6 +83,10 @@ export async function generateSpeech(
 }
 
 export async function getAvailableVoices() {
+  if (!elevenlabs) {
+    throw new Error("Voice functionality is currently unavailable. Please check if the ElevenLabs API key is configured.");
+  }
+
   try {
     const voices = await elevenlabs.voices.getAll();
     return voices.voices;
