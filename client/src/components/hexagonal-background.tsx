@@ -328,16 +328,16 @@ export default function HexagonalBackground() {
           intensity *= textProximityFade;
           
           // Also reduce base opacity near text
-          const baseOpacity = isActive ? (0.8 * textProximityFade) : 0.3;
+          const baseOpacity = isActive ? (0.8 * textProximityFade) : 0.6;
           
           return (
             <g key={hex.id}>
               {/* Base hexagon - subtle and professional */}
               <polygon
                 points={hex.points}
-                fill={isActive ? "rgba(0, 255, 150, 0.03)" : "rgba(255, 255, 255, 0.008)"}
-                stroke={isActive ? `rgba(0, 255, 150, ${0.4 * textProximityFade})` : "rgba(255, 255, 255, 0.06)"}
-                strokeWidth={isActive ? 1 : 0.3}
+                fill={isActive ? "rgba(0, 255, 150, 0.03)" : "rgba(255, 255, 255, 0.02)"}
+                stroke={isActive ? `rgba(0, 255, 150, ${0.4 * textProximityFade})` : "rgba(255, 255, 255, 0.12)"}
+                strokeWidth={isActive ? 1 : 0.5}
                 opacity={baseOpacity}
                 filter={isActive && textProximityFade > 0.5 ? "url(#hexGlowActive)" : "none"}
                 className="transition-all duration-500 ease-out"
