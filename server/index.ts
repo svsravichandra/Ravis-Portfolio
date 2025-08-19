@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -77,16 +78,12 @@ async function startServer() {
     // this serves both the API and the client.
     // It is the only port that is not firewalled.
     const port = parseInt(process.env.PORT || '5000', 10);
-    const host = process.env.HOST || "0.0.0.0";
+    const host = process.env.HOST || "localhost";
     
     log(`Attempting to start server on ${host}:${port}...`);
     
     return new Promise<void>((resolve, reject) => {
-      const serverInstance = server.listen({
-        port,
-        host,
-        reusePort: true,
-      }, () => {
+      const serverInstance = server.listen(port, host, () => {
         log(`✓ Server successfully started and serving on ${host}:${port}`);
         log(`✓ Environment: ${environment}`);
         log(`✓ Process ID: ${process.pid}`);
